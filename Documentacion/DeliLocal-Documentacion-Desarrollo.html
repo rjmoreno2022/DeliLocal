@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeliLocal - Guía de Desarrollo</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+            --border: #30363d;
+            --border-light: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent: #58a6ff;
+            --accent-hover: #79b8ff;
+            --success: #238636;
+            --warning: #d29922;
+            --danger: #da3633;
+            --purple: #bc8cff;
+            --code-bg: #1a1a2e;
+            --sidebar-width: 290px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border) var(--bg); }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            width: var(--sidebar-width); height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto; z-index: 100;
+            padding: 24px 0; transition: transform 0.3s ease;
+        }
+
+        .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+        .sidebar-header h2 { font-size: 1.2rem; color: var(--accent); margin-bottom: 4px; }
+        .sidebar-header p { font-size: 0.75rem; color: var(--text-muted); }
+
+        .sidebar-toggle {
+            display: none; position: fixed; top: 16px; left: 16px; z-index: 200;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            color: var(--text-primary); padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2rem;
+        }
+
+        .nav-list { list-style: none; padding: 0; }
+        .nav-list a {
+            display: block; padding: 8px 20px; color: var(--text-secondary);
+            text-decoration: none; font-size: 0.88rem;
+            border-left: 2px solid transparent; transition: all 0.15s ease;
+        }
+        .nav-list a:hover { color: var(--text-primary); background: var(--bg-tertiary); border-left-color: var(--border); }
+        .nav-list a.active {
+            color: var(--accent); background: rgba(88,166,255,0.08);
+            border-left-color: var(--accent); font-weight: 600;
+        }
+        .nav-list .nav-section {
+            padding: 12px 20px 6px; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;
+            border-top: 1px solid var(--border); margin-top: 8px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+        .content-wrapper { max-width: 960px; margin: 0 auto; padding: 40px 32px; }
+
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center; padding: 80px 24px 60px;
+            background: linear-gradient(135deg, rgba(13,17,23,1) 0%, rgba(22,27,34,1) 50%, rgba(13,17,23,1) 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .hero-logo { font-size: 4rem; margin-bottom: 16px; }
+        .hero h1 {
+            font-size: 2.8rem; font-weight: 800; margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), #3fb950);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero .subtitle {
+            font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 24px;
+            max-width: 680px; margin-left: auto; margin-right: auto;
+        }
+        .hero-meta { display: flex; justify-content: center; gap: 32px; margin-bottom: 32px; flex-wrap: wrap; }
+        .hero-meta span { font-size: 0.9rem; color: var(--text-muted); }
+        .hero-meta strong { color: var(--text-primary); }
+
+        .badges { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px solid; }
+        .badge-blue { background: rgba(88,166,255,0.1); color: var(--accent); border-color: rgba(88,166,255,0.25); }
+        .badge-green { background: rgba(35,134,54,0.1); color: #3fb950; border-color: rgba(35,134,54,0.25); }
+        .badge-purple { background: rgba(188,140,255,0.1); color: var(--purple); border-color: rgba(188,140,255,0.25); }
+        .badge-gray { background: rgba(139,148,158,0.1); color: var(--text-secondary); border-color: rgba(139,148,158,0.25); }
+        .badge-red { background: rgba(218,54,51,0.1); color: #f85149; border-color: rgba(218,54,51,0.25); }
+        .badge-yellow { background: rgba(210,153,34,0.1); color: var(--warning); border-color: rgba(210,153,34,0.25); }
+
+        /* ===== HEADINGS ===== */
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.3; color: var(--text-primary); }
+        h1 { font-size: 2.2rem; margin: 0; }
+        h2 { font-size: 1.8rem; margin: 48px 0 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        h3 { font-size: 1.4rem; margin: 36px 0 16px; color: var(--accent); }
+        h4 { font-size: 1.15rem; margin: 28px 0 12px; }
+        h5 { font-size: 1rem; margin: 20px 0 10px; color: var(--text-secondary); }
+        h2::before { content: '# '; color: var(--accent); }
+        h3::before { content: '## '; color: var(--accent); font-size: 1rem; }
+
+        p { margin: 0 0 16px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        strong { color: #e6edf3; font-weight: 600; }
+        ul, ol { margin: 12px 0 20px 20px; }
+        li { margin: 6px 0; }
+        li::marker { color: var(--accent); }
+
+        /* ===== CODE ===== */
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: var(--code-bg); color: var(--accent);
+            padding: 2px 8px; border-radius: 4px; font-size: 0.88em;
+        }
+        pre {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0;
+            padding: 20px 24px; overflow-x: auto; margin: 20px 0;
+        }
+        pre code { background: none; color: var(--text-primary); padding: 0; font-size: 0.85rem; line-height: 1.7; }
+        .code-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-tertiary); border: 1px solid var(--border);
+            border-bottom: none; border-left: 3px solid var(--accent);
+            padding: 8px 16px; border-radius: 0 8px 0 0;
+            font-size: 0.82rem; margin-top: 20px;
+        }
+        .code-header span { color: var(--text-muted); font-weight: 600; }
+        .copy-btn {
+            background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary);
+            padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; transition: all 0.15s;
+        }
+        .copy-btn:hover { background: var(--border); color: var(--text-primary); }
+        .code-header + pre { margin-top: 0; }
+
+        .kw { color: #ff7b72; }
+        .type { color: #79c0ff; }
+        .str { color: #a5d6ff; }
+        .comment { color: #8b949e; font-style: italic; }
+        .num { color: #79c0ff; }
+        .func { color: #d2a8ff; }
+        .var { color: #ffa657; }
+
+        /* ===== TABLES ===== */
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.92rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        thead { background: var(--bg-tertiary); }
+        th { padding: 14px 18px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+        td { padding: 12px 18px; border-bottom: 1px solid var(--border-light); }
+        tbody tr:hover { background: rgba(88,166,255,0.03); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* ===== CALLOUTS ===== */
+        .callout { padding: 16px 20px; border-radius: 8px; border: 1px solid; margin: 20px 0; display: flex; gap: 12px; align-items: flex-start; }
+        .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+        .callout p { margin: 0; }
+        .callout-info { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.2); }
+        .callout-success { background: rgba(35,134,54,0.06); border-color: rgba(35,134,54,0.2); }
+        .callout-warning { background: rgba(210,153,34,0.06); border-color: rgba(210,153,34,0.2); }
+        .callout-danger { background: rgba(218,54,51,0.06); border-color: rgba(218,54,51,0.2); }
+        .callout-tip { background: rgba(188,140,255,0.06); border-color: rgba(188,140,255,0.2); }
+
+        /* ===== LEARN BOX (explicaciones didacticas) ===== */
+        .learn-box {
+            background: linear-gradient(135deg, rgba(188,140,255,0.07), rgba(88,166,255,0.05));
+            border: 1px solid rgba(188,140,255,0.25);
+            border-radius: 10px; padding: 18px 22px; margin: 20px 0;
+        }
+        .learn-box .learn-title {
+            display: flex; align-items: center; gap: 8px;
+            color: var(--purple); font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;
+        }
+        .learn-box p:last-child { margin-bottom: 0; }
+
+        /* ===== ASCII DIAGRAMS ===== */
+        .ascii-diagram {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-left: 3px solid var(--success); border-radius: 0 8px 8px 0;
+            padding: 20px 24px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.82rem; line-height: 1.6; overflow-x: auto; margin: 20px 0;
+        }
+        .tree-dir { color: var(--accent); font-weight: 600; }
+        .tree-file { color: var(--text-secondary); }
+
+        /* ===== PHASE BOXES ===== */
+        .phase-box { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin: 20px 0; }
+        .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .phase-badge { background: var(--success); color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+        .phase-title { font-size: 1.2rem; font-weight: 700; margin: 0; }
+        .phase-weeks { font-size: 0.85rem; color: var(--text-muted); margin-left: auto; }
+
+        /* ===== STEPS ===== */
+        .step-list { list-style: none; margin: 0; padding: 0; }
+        .step-list li { padding: 10px 0 10px 36px; position: relative; border-bottom: 1px solid var(--border-light); }
+        .step-list li:last-child { border-bottom: none; }
+        .step-num {
+            position: absolute; left: 0; top: 10px; width: 24px; height: 24px;
+            background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; color: var(--accent);
+        }
+
+        /* ===== TAGS ===== */
+        .tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; margin: 2px; }
+        .tag-p0 { background: rgba(218,54,51,0.15); color: #f85149; }
+        .tag-p1 { background: rgba(210,153,34,0.15); color: var(--warning); }
+        .tag-p2 { background: rgba(88,166,255,0.15); color: var(--accent); }
+        .tag-p3 { background: rgba(35,134,54,0.15); color: #3fb950; }
+
+        /* ===== TOC ===== */
+        .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 20px 0; }
+        .toc-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;
+            text-decoration: none; color: var(--text-primary); font-size: 0.9rem; transition: all 0.15s;
+        }
+        .toc-item:hover { border-color: var(--accent); transform: translateX(4px); text-decoration: none; }
+        .toc-num { color: var(--accent); font-weight: 700; font-size: 0.85rem; min-width: 24px; }
+
+        .section-divider { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 60px 0 40px; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            margin-top: 80px; padding: 40px 32px; text-align: center;
+            border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-toggle { display: block; }
+            .main-content { margin-left: 0; }
+            .hero h1 { font-size: 2rem; }
+            .content-wrapper { padding: 24px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+
+<!-- ==================== SIDEBAR ==================== -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2>&#128666; DeliLocal</h2>
+        <p>Guía de Desarrollo v1.0<br>Plataforma de pedidos para negocios locales</p>
+    </div>
+    <ul class="nav-list">
+        <li class="nav-section">Fundamentos</li>
+        <li><a href="#intro">1. Introducción y Visión</a></li>
+        <li><a href="#ia-workflow">2. Cómo Trabajar con IA</a></li>
+        <li><a href="#stack">3. Stack Tecnológico</a></li>
+        <li><a href="#arquitectura">4. Arquitectura de Software</a></li>
+        <li><a href="#estructura">5. Estructura del Monorepo</a></li>
+        <li class="nav-section">Backend</li>
+        <li><a href="#dominio">6. Modelo de Dominio</a></li>
+        <li><a href="#database">7. Base de Datos (Prisma)</a></li>
+        <li><a href="#api">8. API REST (NestJS)</a></li>
+        <li><a href="#websockets">9. WebSockets en Tiempo Real</a></li>
+        <li><a href="#auth">10. Autenticación y Seguridad</a></li>
+        <li class="nav-section">Frontend</li>
+        <li><a href="#web">11. Web (Next.js)</a></li>
+        <li><a href="#mobile">12. Móvil (React Native + Expo)</a></li>
+        <li><a href="#moneda">13. Doble Moneda (USD/VES)</a></li>
+        <li class="nav-section">Ejecución</li>
+        <li><a href="#mvp">14. Features del MVP</a></li>
+        <li><a href="#plan">15. Plan de Desarrollo por Fases</a></li>
+        <li><a href="#practicas">16. Mejores Prácticas</a></li>
+        <li><a href="#testing">17. Testing</a></li>
+        <li><a href="#cicd">18. CI/CD y Deploy</a></li>
+        <li class="nav-section">Referencia</li>
+        <li><a href="#comandos">19. Comandos Rápidos</a></li>
+        <li><a href="#glosario">20. Glosario</a></li>
+        <li><a href="#recursos">21. Recursos</a></li>
+    </ul>
+</nav>
+
+<!-- ==================== MAIN ==================== -->
+<main class="main-content">
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-logo">&#128666;</div>
+        <h1>DeliLocal</h1>
+        <p class="subtitle">Plataforma de pedidos con seguimiento en tiempo real para negocios locales.<br>Web + Móvil + API — Documentación completa para desarrollo asistido por IA.</p>
+        <div class="hero-meta">
+            <span>&#128197; <strong>14 semanas</strong></span>
+            <span>&#128736; <strong>8 fases</strong></span>
+            <span>&#128218; <strong>Nivel: Intermedio</strong></span>
+            <span>&#127758; <strong>TypeScript end-to-end</strong></span>
+        </div>
+        <div class="badges">
+            <span class="badge badge-blue">TypeScript</span>
+            <span class="badge badge-green">NestJS</span>
+            <span class="badge badge-purple">Next.js</span>
+            <span class="badge badge-yellow">React Native + Expo</span>
+            <span class="badge badge-blue">PostgreSQL + Prisma</span>
+            <span class="badge badge-green">WebSockets</span>
+            <span class="badge badge-purple">Turborepo</span>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+
+    <!-- TOC -->
+    <section id="toc">
+        <h2>Tabla de Contenidos</h2>
+        <div class="toc-grid">
+            <a class="toc-item" href="#intro"><span class="toc-num">01</span>Introducción y Visión</a>
+            <a class="toc-item" href="#ia-workflow"><span class="toc-num">02</span>Cómo Trabajar con IA</a>
+            <a class="toc-item" href="#stack"><span class="toc-num">03</span>Stack Tecnológico</a>
+            <a class="toc-item" href="#arquitectura"><span class="toc-num">04</span>Arquitectura de Software</a>
+            <a class="toc-item" href="#estructura"><span class="toc-num">05</span>Estructura del Monorepo</a>
+            <a class="toc-item" href="#dominio"><span class="toc-num">06</span>Modelo de Dominio</a>
+            <a class="toc-item" href="#database"><span class="toc-num">07</span>Base de Datos (Prisma)</a>
+            <a class="toc-item" href="#api"><span class="toc-num">08</span>API REST (NestJS)</a>
+            <a class="toc-item" href="#websockets"><span class="toc-num">09</span>WebSockets en Tiempo Real</a>
+            <a class="toc-item" href="#auth"><span class="toc-num">10</span>Autenticación y Seguridad</a>
+            <a class="toc-item" href="#web"><span class="toc-num">11</span>Web (Next.js)</a>
+            <a class="toc-item" href="#mobile"><span class="toc-num">12</span>Móvil (React Native + Expo)</a>
+            <a class="toc-item" href="#moneda"><span class="toc-num">13</span>Doble Moneda (USD/VES)</a>
+            <a class="toc-item" href="#mvp"><span class="toc-num">14</span>Features del MVP</a>
+            <a class="toc-item" href="#plan"><span class="toc-num">15</span>Plan de Desarrollo por Fases</a>
+            <a class="toc-item" href="#practicas"><span class="toc-num">16</span>Mejores Prácticas</a>
+            <a class="toc-item" href="#testing"><span class="toc-num">17</span>Testing</a>
+            <a class="toc-item" href="#cicd"><span class="toc-num">18</span>CI/CD y Deploy</a>
+            <a class="toc-item" href="#comandos"><span class="toc-num">19</span>Comandos Rápidos</a>
+            <a class="toc-item" href="#glosario"><span class="toc-num">20</span>Glosario</a>
+            <a class="toc-item" href="#recursos"><span class="toc-num">21</span>Recursos</a>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 1. INTRODUCCION ==================== -->
+    <section id="intro">
+        <h2>Introducción y Visión</h2>
+
+        <h3>¿Qué es DeliLocal?</h3>
+        <p>DeliLocal es una <strong>plataforma de pedidos en línea para un negocio local</strong> (restaurante, bodega, farmacia, pastelería). El cliente navega el catálogo desde la app móvil o la web, arma su pedido, lo envía y <strong>sigue su estado en tiempo real</strong>. El negocio recibe el pedido al instante, lo gestiona desde un dashboard y actualiza su estado (recibido → preparando → listo → entregado).</p>
+
+        <h3>El problema que resuelve (contexto Venezuela)</h3>
+        <ul>
+            <li><strong>Caos de WhatsApp:</strong> los negocios reciben pedidos por chat, se pierden mensajes, no hay historial ni trazabilidad.</li>
+            <li><strong>Precios en doble moneda:</strong> los productos se cotizan en USD pero se pagan en bolívares; la tasa cambia a diario.</li>
+            <li><strong>Métodos de pago locales:</strong> pago móvil, Zelle, efectivo USD — ninguna pasarela internacional los soporta bien.</li>
+            <li><strong>Sin seguimiento:</strong> el cliente pregunta "¿cómo va mi pedido?" una y otra vez.</li>
+        </ul>
+
+        <h3>Decisiones de producto (ya tomadas)</h3>
+        <table>
+            <thead><tr><th>Decisión</th><th>Opción elegida</th><th>Consecuencia técnica</th></tr></thead>
+            <tbody>
+                <tr><td>Modelo de negocio</td><td><strong>Mono-tienda</strong> (un negocio por despliegue)</td><td>No se requiere multi-tenancy; la tabla <code>Store</code> existe pero tiene una sola fila, lo que facilita escalar a multi-tienda después.</td></tr>
+                <tr><td>Plataformas</td><td><strong>Móvil y web para todo</strong></td><td>App móvil (Expo) + app web (Next.js) comparten la misma API. Lógica compartida en un paquete <code>shared</code>.</td></tr>
+                <tr><td>Tiempo real</td><td><strong>Sí, WebSockets</strong></td><td>NestJS Gateways con Socket.IO. Los clientes se suscriben a eventos de sus pedidos.</td></tr>
+                <tr><td>Pagos</td><td><strong>Confirmación manual</strong> (pago móvil / Zelle / efectivo)</td><td>El cliente reporta la referencia de pago; el negocio la confirma. Sin pasarelas de pago en el MVP.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Roles de usuario</h3>
+        <table>
+            <thead><tr><th>Rol</th><th>Descripción</th><th>Pantallas principales</th></tr></thead>
+            <tbody>
+                <tr><td><code>CUSTOMER</code></td><td>Cliente que hace pedidos</td><td>Catálogo, carrito, checkout, mis pedidos, seguimiento</td></tr>
+                <tr><td><code>ADMIN</code></td><td>Dueño del negocio</td><td>Dashboard, gestión de menú, gestión de pedidos, configuración</td></tr>
+                <tr><td><code>STAFF</code></td><td>Empleado que atiende pedidos</td><td>Cola de pedidos, actualización de estados</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Objetivos de aprendizaje del proyecto</h3>
+        <p>Este proyecto está diseñado para que domines las tecnologías con más demanda de trabajo remoto:</p>
+        <ol>
+            <li><strong>TypeScript</strong> en frontend, backend y móvil (un solo lenguaje, tres plataformas).</li>
+            <li><strong>React + Next.js</strong>: el stack web más pedido del mercado.</li>
+            <li><strong>React Native + Expo</strong>: móvil multiplataforma con un solo código.</li>
+            <li><strong>NestJS</strong>: framework backend con arquitectura profesional (muy similar a ASP.NET, lo que aprovecha tu experiencia en .NET).</li>
+            <li><strong>WebSockets</strong>: comunicación en tiempo real (muy valorado en entrevistas).</li>
+            <li><strong>Monorepos</strong>: cómo las empresas modernas organizan proyectos grandes.</li>
+            <li><strong>CI/CD y deploy</strong>: llevar el proyecto a producción real.</li>
+        </ol>
+
+        <div class="callout callout-tip">
+            <span class="callout-icon">&#128161;</span>
+            <p><strong>Conexión con FinTrack:</strong> vienes de Clean Architecture en .NET. En esta guía verás constantes paralelismos: los <em>módulos</em> de NestJS ≈ tus proyectos de solution, la <em>inyección de dependencias</em> es idéntica en concepto, los <em>decoradores</em> ≈ atributos de C#, y Prisma ≈ Entity Framework. Este paralelismo acelerará tu aprendizaje.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 2. TRABAJAR CON IA ==================== -->
+    <section id="ia-workflow">
+        <h2>Cómo Trabajar con un Modelo de IA</h2>
+        <p>Esta guía está escrita para que puedas entregársela (completa o por secciones) a un modelo de IA y obtener código de calidad profesional. Sigue este flujo de trabajo:</p>
+
+        <h3>Reglas de oro</h3>
+        <ol>
+            <li><strong>Una fase a la vez.</strong> No pidas "construye todo el proyecto". Pide la Fase 1, verifícala, y recién entonces pasa a la Fase 2.</li>
+            <li><strong>Contexto explícito.</strong> Al iniciar cada sesión con la IA, pégale: la sección de Stack (3), la de Estructura (5) y la fase actual del Plan (15).</li>
+            <li><strong>Verifica antes de continuar.</strong> Cada fase tiene un <strong>entregable</strong> verificable. No avances si no se cumple.</li>
+            <li><strong>Entiende lo que recibes.</strong> Cada bloque <em>&#127891; Aprende</em> de esta guía explica el porqué. Si la IA genera algo que no entiendes, pídele que lo explique línea por línea antes de aceptarlo.</li>
+            <li><strong>Commits por paso.</strong> Haz commit después de cada paso completado y verificado, no al final de la fase.</li>
+        </ol>
+
+        <h3>Plantilla de prompt para cada fase</h3>
+        <div class="code-header"><span>prompt-template.md</span><button class="copy-btn">Copiar</button></div>
+<pre><code>Estoy construyendo DeliLocal, una plataforma de pedidos para un negocio local.
+
+STACK (no te desvíes de él):
+- Monorepo con Turborepo + npm workspaces
+- API: NestJS 10 + Prisma 5 + PostgreSQL 16
+- Web: Next.js 14 (App Router) + Tailwind CSS + shadcn/ui
+- Móvil: Expo SDK 51 (React Native) + Expo Router
+- Tiempo real: Socket.IO (NestJS Gateways)
+- Auth: JWT access + refresh tokens, bcrypt
+- TODO el código en TypeScript estricto
+
+CONTEXTO ACTUAL: [pega aquí lo que ya existe]
+
+TAREA (Fase X, paso Y): [pega el paso exacto de la guía]
+
+REGLAS:
+- Sigue la estructura de carpetas definida en la guía
+- Explica cada decisión no obvia con comentarios
+- No agregues dependencias sin justificarlas
+- Genera también los tests cuando el paso los pida
+- Al final, dime qué comandos ejecutar para verificar que funciona</code></pre>
+
+        <div class="callout callout-warning">
+            <span class="callout-icon">&#9888;</span>
+            <p><strong>Error común:</strong> dejar que la IA elija librerías alternativas ("podríamos usar X en lugar de Y"). Esto fragmenta el stack y genera inconsistencias entre fases. La respuesta correcta es: "No, usa el stack definido".</p>
+        </div>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: ¿por qué un documento como este?</div>
+            <p>Los modelos de IA no tienen memoria entre sesiones y tienden a improvisar arquitecturas distintas cada vez. Una guía como esta actúa como <strong>fuente única de verdad</strong> (single source of truth): define decisiones una vez y obliga a que todas las sesiones de desarrollo sean consistentes. Es el equivalente moderno del "documento de diseño" que los equipos senior escriben antes de codear.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 3. STACK ==================== -->
+    <section id="stack">
+        <h2>Stack Tecnológico</h2>
+
+        <h3>Resumen</h3>
+        <table>
+            <thead><tr><th>Capa</th><th>Tecnología</th><th>Versión</th><th>Equivalente en tu experiencia .NET</th></tr></thead>
+            <tbody>
+                <tr><td>Lenguaje</td><td><strong>TypeScript</strong></td><td>5.x</td><td>C# (tipado estático, clases, interfaces)</td></tr>
+                <tr><td>Backend</td><td><strong>NestJS</strong></td><td>10.x</td><td>ASP.NET Core (DI, decoradores, middleware)</td></tr>
+                <tr><td>ORM</td><td><strong>Prisma</strong></td><td>5.x</td><td>Entity Framework Core</td></tr>
+                <tr><td>Base de datos</td><td><strong>PostgreSQL</strong></td><td>16</td><td>SQL Server</td></tr>
+                <tr><td>Web</td><td><strong>Next.js + React</strong></td><td>14.x / 18.x</td><td>Blazor (componentes con estado)</td></tr>
+                <tr><td>Estilos web</td><td><strong>Tailwind CSS + shadcn/ui</strong></td><td>3.x</td><td>Bootstrap / MudBlazor</td></tr>
+                <tr><td>Móvil</td><td><strong>Expo (React Native)</strong></td><td>SDK 51</td><td>.NET MAUI</td></tr>
+                <tr><td>Tiempo real</td><td><strong>Socket.IO</strong></td><td>4.x</td><td>SignalR</td></tr>
+                <tr><td>Monorepo</td><td><strong>Turborepo</strong></td><td>2.x</td><td>Una Solution con múltiples proyectos</td></tr>
+                <tr><td>Validación</td><td><strong>Zod</strong></td><td>3.x</td><td>FluentValidation / DataAnnotations</td></tr>
+                <tr><td>Testing</td><td><strong>Vitest + Testing Library</strong></td><td>1.x</td><td>xUnit + Moq</td></tr>
+                <tr><td>Imágenes</td><td><strong>Cloudinary</strong></td><td>—</td><td>Azure Blob Storage</td></tr>
+                <tr><td>Deploy</td><td><strong>Vercel + Railway + EAS</strong></td><td>—</td><td>Azure App Service</td></tr>
+            </tbody>
+        </table>
+
+        <h3>¿Por qué estas elecciones?</h3>
+
+        <h4>TypeScript en todo</h4>
+        <p>Un solo lenguaje reduce la carga cognitiva y permite <strong>compartir tipos entre frontend y backend</strong>: si cambias un campo en la API, TypeScript te avisa en la web y en el móvil al instante. Esto es imposible con stacks mixtos.</p>
+
+        <h4>NestJS (no Express puro)</h4>
+        <p>Express es minimalista: no impone arquitectura y los proyectos terminan desordenados. NestJS impone módulos, controladores, servicios e inyección de dependencias — la misma estructura que ya conoces de ASP.NET. Además, es de los frameworks de Node más demandados laboralmente.</p>
+
+        <h4>Prisma (no TypeORM)</h4>
+        <p>Prisma define el modelo en un archivo <code>schema.prisma</code> declarativo y genera un cliente 100% tipado. Sus migraciones son predecibles y su autocompletado es superior. TypeORM está en declive; Prisma domina el mercado actual.</p>
+
+        <h4>Next.js App Router (no Create React App)</h4>
+        <p>CRA está muerto oficialmente. Next.js es el estándar: ofrece Server Components, rutas por archivos, SSR/SSG y deploy trivial en Vercel. Es lo que aparece en la gran mayoría de ofertas de trabajo remoto de React.</p>
+
+        <h4>Expo (no React Native "bare")</h4>
+        <p>Expo elimina la configuración nativa (Xcode/Android Studio) para el 95% de los casos, añade un ecosistema de librerías probadas (notificaciones, cámara, etc.) y permite builds en la nube con EAS. Para una app como esta, no necesitas nada más.</p>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: ¿qué es un monorepo?</div>
+            <p>Un <strong>monorepo</strong> es un único repositorio Git que contiene varios proyectos relacionados (API, web, móvil) más paquetes compartidos. La alternativa (un repo por proyecto) obliga a versionar y sincronizar cambios entre repos. En el monorepo, un cambio en un tipo compartido se refleja inmediatamente en las tres apps. Empresas como Google, Meta y Vercel usan monorepos. <strong>Turborepo</strong> orquesta las tareas (build, test, lint) cacheando resultados para que todo sea rápido.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 4. ARQUITECTURA ==================== -->
+    <section id="arquitectura">
+        <h2>Arquitectura de Software</h2>
+
+        <h3>Vista general del sistema</h3>
+        <div class="ascii-diagram">
+                        ┌─────────────────────────────┐
+                        │         CLIENTES            │
+                        │                             │
+                        │   ┌─────────┐  ┌─────────┐  │
+                        │   │ Web App │  │ App     │  │
+                        │   │ Next.js │  │ Expo/RN │  │
+                        │   └────┬────┘  └────┬────┘  │
+                        └────────┼────────────┼───────┘
+                                 │            │
+                    HTTPS (REST) │            │ WSS (Socket.IO)
+                                 │            │
+                        ┌────────▼────────────▼───────┐
+                        │      API NestJS             │
+                        │  ┌───────────────────────┐  │
+                        │  │ Controllers (REST)    │  │
+                        │  │ Gateways (WebSocket)  │  │
+                        │  │ Services (lógica)     │  │
+                        │  │ Guards + Interceptors │  │
+                        │  └───────────┬───────────┘  │
+                        │       Prisma │ ORM          │
+                        └──────────────┼──────────────┘
+                                       │
+                        ┌──────────────▼──────────────┐
+                        │      PostgreSQL 16          │
+                        └─────────────────────────────┘
+
+          Servicios externos: Cloudinary (imágenes) · Expo Push (notificaciones) · API tasa BCV
+        </div>
+
+        <h3>Arquitectura interna de la API (NestJS)</h3>
+        <p>NestJS organiza el código en <strong>módulos por dominio</strong>. Cada módulo encapsula sus controladores, servicios y DTOs. Es el equivalente a organizar tu solution de .NET por features en lugar de por capas técnicas.</p>
+
+        <div class="ascii-diagram">
+  AppModule
+  ├── AuthModule        → login, registro, refresh, guards JWT, roles
+  ├── UsersModule       → perfil, direcciones del cliente
+  ├── CatalogModule     → categorías y productos (el menú)
+  ├── OrdersModule      → crear pedido, cambiar estado, historial  ← núcleo
+  ├── PaymentsModule    → reportar referencia de pago, confirmar
+  ├── NotificationsModule → push tokens, envío de notificaciones
+  ├── ExchangeRateModule → tasa USD/VES del día
+  ├── RealtimeModule    → gateway Socket.IO, rooms por pedido
+  └── ConfigModule      → variables de entorno validadas
+        </div>
+
+        <h3>Flujo de un pedido (el flujo más importante del sistema)</h3>
+        <ol class="step-list">
+            <li><span class="step-num">1</span><strong>Cliente crea pedido</strong> → <code>POST /orders</code> con items y método de pago. La API valida stock y precios, calcula totales (USD y VES según la tasa del día) y guarda con estado <code>PENDING</code>.</li>
+            <li><span class="step-num">2</span><strong>API emite evento WebSocket</strong> <code>order:created</code> a la sala <code>store:admins</code> → el dashboard del negocio muestra el pedido nuevo al instante (con sonido) y se envía push notification.</li>
+            <li><span class="step-num">3</span><strong>Negocio acepta</strong> → <code>PATCH /orders/:id/status</code> a <code>CONFIRMED</code> → evento <code>order:updated</code> a la sala <code>order:{id}</code> → el cliente ve el cambio en vivo + push.</li>
+            <li><span class="step-num">4</span><strong>Cliente reporta pago</strong> → <code>POST /orders/:id/payment</code> con referencia (pago móvil/Zelle) → el negocio la confirma → estado de pago <code>VERIFIED</code>.</li>
+            <li><span class="step-num">5</span><strong>Estados siguientes:</strong> <code>PREPARING</code> → <code>READY</code> → <code>DELIVERED</code> (o <code>CANCELLED</code> con motivo). Cada cambio emite WebSocket + push.</li>
+        </ol>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: REST vs WebSockets — ¿cuándo usar cada uno?</div>
+            <p><strong>REST</strong> es request/response: el cliente pregunta, el servidor responde. Ideal para acciones (crear pedido, listar productos). <strong>WebSockets</strong> mantiene una conexión abierta bidireccional: el servidor puede "empujar" datos sin que el cliente pregunte. Ideal para eventos (tu pedido cambió de estado). Regla práctica: <em>comandos por REST, notificaciones por WebSocket</em>. Nunca uses WebSockets para CRUD ni REST con polling para tiempo real.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 5. ESTRUCTURA ==================== -->
+    <section id="estructura">
+        <h2>Estructura del Monorepo</h2>
+
+        <div class="ascii-diagram"><span class="tree-dir">delilocal/</span>
+├── <span class="tree-dir">apps/</span>
+│   ├── <span class="tree-dir">api/</span>                          <span class="tree-file"># NestJS — backend</span>
+│   │   ├── <span class="tree-dir">src/</span>
+│   │   │   ├── <span class="tree-dir">auth/</span>            <span class="tree-file"># controller, service, guards, strategies, dto/</span>
+│   │   │   ├── <span class="tree-dir">users/</span>           <span class="tree-file"># perfil, direcciones</span>
+│   │   │   ├── <span class="tree-dir">catalog/</span>         <span class="tree-file"># categories, products</span>
+│   │   │   ├── <span class="tree-dir">orders/</span>          <span class="tree-file"># núcleo del negocio</span>
+│   │   │   ├── <span class="tree-dir">payments/</span>        <span class="tree-file"># referencias de pago</span>
+│   │   │   ├── <span class="tree-dir">notifications/</span>   <span class="tree-file"># expo push</span>
+│   │   │   ├── <span class="tree-dir">exchange-rate/</span>   <span class="tree-file"># tasa BCV</span>
+│   │   │   ├── <span class="tree-dir">realtime/</span>        <span class="tree-file"># websocket gateway</span>
+│   │   │   ├── <span class="tree-dir">prisma/</span>          <span class="tree-file"># prisma.service.ts</span>
+│   │   │   ├── <span class="tree-file">app.module.ts</span>
+│   │   │   └── <span class="tree-file">main.ts</span>
+│   │   ├── <span class="tree-dir">prisma/</span>
+│   │   │   ├── <span class="tree-file">schema.prisma</span>
+│   │   │   └── <span class="tree-file">seed.ts</span>
+│   │   └── <span class="tree-file">package.json</span>
+│   │
+│   ├── <span class="tree-dir">web/</span>                          <span class="tree-file"># Next.js 14 (App Router)</span>
+│   │   ├── <span class="tree-dir">app/</span>
+│   │   │   ├── <span class="tree-dir">(shop)/</span>          <span class="tree-file"># catálogo, carrito, checkout, pedidos (cliente)</span>
+│   │   │   ├── <span class="tree-dir">(admin)/admin/</span>   <span class="tree-file"># dashboard del negocio (protegido)</span>
+│   │   │   ├── <span class="tree-dir">(auth)/</span>          <span class="tree-file"># login, registro</span>
+│   │   │   ├── <span class="tree-file">layout.tsx</span>
+│   │   │   └── <span class="tree-file">page.tsx</span>
+│   │   ├── <span class="tree-dir">components/</span>      <span class="tree-file"># ui/ (shadcn) + componentes de negocio</span>
+│   │   ├── <span class="tree-dir">lib/</span>             <span class="tree-file"># api-client, socket-client, hooks</span>
+│   │   └── <span class="tree-file">package.json</span>
+│   │
+│   └── <span class="tree-dir">mobile/</span>                       <span class="tree-file"># Expo + Expo Router</span>
+│       ├── <span class="tree-dir">app/</span>               <span class="tree-file"># rutas (file-based, igual que Next)</span>
+│       │   ├── <span class="tree-dir">(tabs)/</span>          <span class="tree-file"># catálogo, carrito, pedidos, perfil</span>
+│       │   ├── <span class="tree-dir">order/[id].tsx</span>   <span class="tree-file"># seguimiento en vivo</span>
+│       │   └── <span class="tree-file">_layout.tsx</span>
+│       ├── <span class="tree-dir">components/</span>
+│       ├── <span class="tree-dir">lib/</span>               <span class="tree-file"># api-client, socket-client, storage</span>
+│       └── <span class="tree-file">package.json</span>
+│
+├── <span class="tree-dir">packages/</span>
+│   └── <span class="tree-dir">shared/</span>                       <span class="tree-file"># código compartido por las 3 apps</span>
+│       ├── <span class="tree-dir">src/</span>
+│       │   ├── <span class="tree-dir">types/</span>           <span class="tree-file"># Order, Product, User, enums (OrderStatus...)</span>
+│       │   ├── <span class="tree-dir">schemas/</span>         <span class="tree-file"># validaciones Zod (CreateOrderSchema...)</span>
+│       │   ├── <span class="tree-dir">constants/</span>       <span class="tree-file"># eventos WS, endpoints, límites</span>
+│       │   └── <span class="tree-dir">utils/</span>           <span class="tree-file"># formatMoney, currency math</span>
+│       └── <span class="tree-file">package.json</span>        <span class="tree-file"># nombre: @delilocal/shared</span>
+│
+├── <span class="tree-file">turbo.json</span>
+├── <span class="tree-file">package.json</span>                     <span class="tree-file"># workspaces + scripts raíz</span>
+├── <span class="tree-file">.env.example</span>
+└── <span class="tree-file">README.md</span></div>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: el paquete <code>shared</code> es la pieza más valiosa</div>
+            <p>El enum <code>OrderStatus</code> lo usan la API (para validar transiciones), la web (para mostrar badges de colores) y el móvil (para la línea de tiempo del pedido). Si viviera duplicado en tres lugares, tarde o temprano se desincronizaría. Al vivir en <code>@delilocal/shared</code>, hay <strong>una sola definición</strong> y TypeScript garantiza consistencia en las tres apps. Lo mismo aplica a los esquemas Zod: la misma validación corre en el servidor (seguridad) y en los formularios (UX).</p>
+        </div>
+
+        <div class="callout callout-info">
+            <span class="callout-icon">&#8505;</span>
+            <p><strong>Regla de dependencias:</strong> <code>apps/*</code> pueden importar de <code>packages/*</code>. Los paquetes <strong>nunca</strong> importan de las apps. Las apps nunca importan entre sí. Esta dirección única evita dependencias circulares.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 6. DOMINIO ==================== -->
+    <section id="dominio">
+        <h2>Modelo de Dominio</h2>
+
+        <h3>Diagrama de entidades</h3>
+        <div class="ascii-diagram">
+  ┌──────────┐ 1   N ┌───────────┐ N   1 ┌──────────────┐
+  │   User   │───────│   Order   │───────│  OrderItem   │
+  └────┬─────┘       └─────┬─────┘       └──────┬───────┘
+       │ 1                 │ 1                  │ N
+       │                   │                    │
+       │ N                 │ 1                  │ N   1 ┌───────────┐
+  ┌────▼─────┐       ┌─────▼──────┐            └───────│  Product  │
+  │ Address  │       │  Payment   │                    └─────┬─────┘
+  └──────────┘       └────────────┘                          │ N
+                                                             │
+  ┌──────────┐ 1   N ┌───────────┐                    N    1 │
+  │  Store   │───────│ Category  │────────────────────────────┘
+  └────┬─────┘       └───────────┘
+       │ 1
+       │ N
+  ┌────▼─────────┐     ┌─────────────────┐
+  │ ExchangeRate │     │  PushToken      │ (de User)
+  └──────────────┘     └─────────────────┘
+        </div>
+
+        <h3>Descripción de entidades</h3>
+        <table>
+            <thead><tr><th>Entidad</th><th>Responsabilidad</th><th>Campos clave</th></tr></thead>
+            <tbody>
+                <tr><td><code>Store</code></td><td>El negocio (una sola fila en el MVP)</td><td>name, slug, logoUrl, whatsapp, isOpen, deliveryFeeUsd</td></tr>
+                <tr><td><code>User</code></td><td>Cualquier usuario del sistema</td><td>email, passwordHash, name, phone, role (CUSTOMER/ADMIN/STAFF)</td></tr>
+                <tr><td><code>Address</code></td><td>Direcciones de entrega del cliente</td><td>label, street, reference, lat/lng (opcional)</td></tr>
+                <tr><td><code>Category</code></td><td>Agrupa productos del menú</td><td>name, sortOrder, isActive</td></tr>
+                <tr><td><code>Product</code></td><td>Ítem del menú</td><td>name, description, priceUsd, imageUrl, isAvailable, categoryId</td></tr>
+                <tr><td><code>Order</code></td><td>El pedido — entidad central</td><td>orderNumber, status, subtotalUsd, deliveryFeeUsd, totalUsd, exchangeRate, totalVes, paymentMethod, notes</td></tr>
+                <tr><td><code>OrderItem</code></td><td>Línea del pedido (snapshot del producto)</td><td>productName, unitPriceUsd, quantity, notes</td></tr>
+                <tr><td><code>Payment</code></td><td>Reporte de pago del cliente</td><td>method, reference, amountVes/amountUsd, status (REPORTED/VERIFIED/REJECTED)</td></tr>
+                <tr><td><code>ExchangeRate</code></td><td>Tasa USD/VES por día</td><td>rate, source, effectiveDate</td></tr>
+                <tr><td><code>PushToken</code></td><td>Token Expo del dispositivo del usuario</td><td>token, platform</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Enum: ciclo de vida del pedido</h3>
+        <div class="code-header"><span>packages/shared/src/types/order.ts</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="kw">export enum</span> <span class="type">OrderStatus</span> {
+  <span class="type">PENDING</span>   = <span class="str">'PENDING'</span>,    <span class="comment">// creado por el cliente, esperando aceptación del negocio</span>
+  <span class="type">CONFIRMED</span> = <span class="str">'CONFIRMED'</span>,  <span class="comment">// negocio aceptó el pedido</span>
+  <span class="type">PREPARING</span> = <span class="str">'PREPARING'</span>,  <span class="comment">// en cocina / en preparación</span>
+  <span class="type">READY</span>     = <span class="str">'READY'</span>,      <span class="comment">// listo para entrega o retiro</span>
+  <span class="type">DELIVERED</span> = <span class="str">'DELIVERED'</span>,  <span class="comment">// entregado (estado final)</span>
+  <span class="type">CANCELLED</span> = <span class="str">'CANCELLED'</span>,  <span class="comment">// cancelado (estado final)</span>
+}
+
+<span class="comment">// Máquina de estados: qué transiciones son legales</span>
+<span class="kw">export const</span> <span class="type">ORDER_TRANSITIONS</span>: <span class="type">Record</span>&lt;<span class="type">OrderStatus</span>, <span class="type">OrderStatus</span>[]&gt; = {
+  [<span class="type">OrderStatus</span>.PENDING]:   [<span class="type">OrderStatus</span>.CONFIRMED, <span class="type">OrderStatus</span>.CANCELLED],
+  [<span class="type">OrderStatus</span>.CONFIRMED]: [<span class="type">OrderStatus</span>.PREPARING, <span class="type">OrderStatus</span>.CANCELLED],
+  [<span class="type">OrderStatus</span>.PREPARING]: [<span class="type">OrderStatus</span>.READY, <span class="type">OrderStatus</span>.CANCELLED],
+  [<span class="type">OrderStatus</span>.READY]:     [<span class="type">OrderStatus</span>.DELIVERED],
+  [<span class="type">OrderStatus</span>.DELIVERED]: [],  <span class="comment">// final</span>
+  [<span class="type">OrderStatus</span>.CANCELLED]: [],  <span class="comment">// final</span>
+};</code></pre>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: ¿por qué una máquina de estados explícita?</div>
+            <p>Sin ella, cualquier endpoint podría poner un pedido <code>DELIVERED</code> directamente desde <code>PENDING</code>, o "resucitar" un pedido cancelado. Al declarar las transiciones legales en un solo lugar (y compartirlo vía <code>@delilocal/shared</code>), el backend valida cada cambio y el frontend puede <em>deshabilitar botones imposibles</em> usando la misma tabla. Es el patrón <strong>State Machine</strong>, y es una pregunta clásica de entrevistas técnicas.</p>
+        </div>
+
+        <h3>Reglas de negocio innegociables</h3>
+        <ol>
+            <li><strong>Snapshot de precios:</strong> <code>OrderItem</code> copia el nombre y precio del producto en el momento de la compra. Si mañana el producto cambia de precio, los pedidos históricos no se alteran.</li>
+            <li><strong>Snapshot de tasa:</strong> <code>Order</code> guarda la <code>exchangeRate</code> usada. El total en VES del pedido no cambia si la tasa cambia después.</li>
+            <li><strong>Stock implícito:</strong> un producto con <code>isAvailable = false</code> no puede añadirse a pedidos nuevos (validado en servidor al crear la orden, no solo en la UI).</li>
+            <li><strong>Número de orden legible:</strong> <code>orderNumber</code> es secuencial por día (ej. <code>#20250612-0042</code>) para que el negocio y el cliente hablen de "el pedido 42" y no de un UUID.</li>
+            <li><strong>Cancelación con motivo:</strong> todo pedido cancelado registra <code>cancelReason</code> y quién lo canceló.</li>
+        </ol>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 7. DATABASE ==================== -->
+    <section id="database">
+        <h2>Base de Datos (Prisma + PostgreSQL)</h2>
+
+        <h3>Schema completo</h3>
+        <p>Este es el corazón de los datos del sistema. Prisma genera a partir de aquí las migraciones SQL y un cliente TypeScript totalmente tipado.</p>
+
+        <div class="code-header"><span>apps/api/prisma/schema.prisma</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="func">generator</span> client {
+  provider = <span class="str">"prisma-client-js"</span>
+}
+
+<span class="func">datasource</span> db {
+  provider = <span class="str">"postgresql"</span>
+  url      = <span class="func">env</span>(<span class="str">"DATABASE_URL"</span>)
+}
+
+<span class="kw">enum</span> <span class="type">Role</span> {
+  CUSTOMER
+  ADMIN
+  STAFF
+}
+
+<span class="kw">enum</span> <span class="type">OrderStatus</span> {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+<span class="kw">enum</span> <span class="type">PaymentMethod</span> {
+  CASH_USD        <span class="comment">// efectivo dólares</span>
+  CASH_VES        <span class="comment">// efectivo bolívares</span>
+  PAGO_MOVIL      <span class="comment">// pago móvil (Venezuela)</span>
+  ZELLE
+  BINANCE
+}
+
+<span class="kw">enum</span> <span class="type">PaymentStatus</span> {
+  REPORTED   <span class="comment">// cliente reportó la referencia</span>
+  VERIFIED   <span class="comment">// negocio confirmó recepción</span>
+  REJECTED   <span class="comment">// negocio rechazó (referencia inválida)</span>
+}
+
+<span class="kw">model</span> <span class="type">Store</span> {
+  id             String   <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  name           String
+  slug           String   <span class="func">@unique</span>
+  logoUrl        String?
+  whatsapp       String?
+  address        String?
+  isOpen         Boolean  <span class="func">@default</span>(<span class="kw">true</span>)
+  deliveryFeeUsd Decimal  <span class="func">@db.Decimal</span>(10, 2) <span class="func">@default</span>(0)
+  createdAt      DateTime <span class="func">@default</span>(<span class="func">now</span>())
+  updatedAt      DateTime <span class="func">@updatedAt</span>
+  categories     Category[]
+  products       Product[]
+  orders         Order[]
+}
+
+<span class="kw">model</span> <span class="type">User</span> {
+  id           String      <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  email        String      <span class="func">@unique</span>
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role        <span class="func">@default</span>(CUSTOMER)
+  createdAt    DateTime    <span class="func">@default</span>(<span class="func">now</span>())
+  updatedAt    DateTime    <span class="func">@updatedAt</span>
+  addresses    Address[]
+  orders       Order[]
+  pushTokens   PushToken[]
+}
+
+<span class="kw">model</span> <span class="type">Address</span> {
+  id         String  <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  userId     String
+  label      String  <span class="comment">// "Casa", "Oficina"</span>
+  street     String
+  reference  String? <span class="comment">// "frente a la farmacia, portón verde"</span>
+  isDefault  Boolean <span class="func">@default</span>(<span class="kw">false</span>)
+  user       User    <span class="func">@relation</span>(fields: [userId], references: [id], onDelete: Cascade)
+
+  <span class="func">@@index</span>([userId])
+}
+
+<span class="kw">model</span> <span class="type">Category</span> {
+  id        String    <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  storeId   String
+  name      String
+  sortOrder Int       <span class="func">@default</span>(0)
+  isActive  Boolean   <span class="func">@default</span>(<span class="kw">true</span>)
+  store     Store     <span class="func">@relation</span>(fields: [storeId], references: [id], onDelete: Cascade)
+  products  Product[]
+
+  <span class="func">@@index</span>([storeId])
+}
+
+<span class="kw">model</span> <span class="type">Product</span> {
+  id          String      <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  storeId     String
+  categoryId  String
+  name        String
+  description String?
+  priceUsd    Decimal     <span class="func">@db.Decimal</span>(10, 2)
+  imageUrl    String?
+  isAvailable Boolean     <span class="func">@default</span>(<span class="kw">true</span>)
+  createdAt   DateTime    <span class="func">@default</span>(<span class="func">now</span>())
+  updatedAt   DateTime    <span class="func">@updatedAt</span>
+  store       Store       <span class="func">@relation</span>(fields: [storeId], references: [id], onDelete: Cascade)
+  category    Category    <span class="func">@relation</span>(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+
+  <span class="func">@@index</span>([storeId, isAvailable])
+  <span class="func">@@index</span>([categoryId])
+}
+
+<span class="kw">model</span> <span class="type">Order</span> {
+  id            String        <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  orderNumber   String        <span class="func">@unique</span>   <span class="comment">// "20250612-0042"</span>
+  storeId       String
+  customerId    String
+  addressId     String?
+  status        OrderStatus   <span class="func">@default</span>(PENDING)
+  paymentMethod PaymentMethod
+  subtotalUsd   Decimal       <span class="func">@db.Decimal</span>(10, 2)
+  deliveryFeeUsd Decimal      <span class="func">@db.Decimal</span>(10, 2)
+  totalUsd      Decimal       <span class="func">@db.Decimal</span>(10, 2)
+  exchangeRate  Decimal       <span class="func">@db.Decimal</span>(12, 2) <span class="comment">// snapshot de la tasa</span>
+  totalVes      Decimal       <span class="func">@db.Decimal</span>(14, 2)
+  notes         String?
+  cancelReason  String?
+  createdAt     DateTime      <span class="func">@default</span>(<span class="func">now</span>())
+  updatedAt     DateTime      <span class="func">@updatedAt</span>
+  store         Store         <span class="func">@relation</span>(fields: [storeId], references: [id])
+  customer      User          <span class="func">@relation</span>(fields: [customerId], references: [id])
+  items         OrderItem[]
+  payment       Payment?
+
+  <span class="func">@@index</span>([customerId, createdAt])
+  <span class="func">@@index</span>([storeId, status])
+}
+
+<span class="kw">model</span> <span class="type">OrderItem</span> {
+  id           String  <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  orderId      String
+  productId    String?
+  productName  String  <span class="comment">// snapshot: no depende del producto actual</span>
+  unitPriceUsd Decimal <span class="func">@db.Decimal</span>(10, 2)
+  quantity     Int
+  notes        String? <span class="comment">// "sin cebolla"</span>
+  order        Order   <span class="func">@relation</span>(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product? <span class="func">@relation</span>(fields: [productId], references: [id], onDelete: SetNull)
+
+  <span class="func">@@index</span>([orderId])
+}
+
+<span class="kw">model</span> <span class="type">Payment</span> {
+  id         String        <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  orderId    String        <span class="func">@unique</span>
+  method     PaymentMethod
+  reference  String?       <span class="comment">// nro. de referencia del pago móvil / Zelle</span>
+  amountVes  Decimal?      <span class="func">@db.Decimal</span>(14, 2)
+  amountUsd  Decimal?      <span class="func">@db.Decimal</span>(10, 2)
+  status     PaymentStatus <span class="func">@default</span>(REPORTED)
+  verifiedBy String?       <span class="comment">// userId del admin/staff que confirmó</span>
+  createdAt  DateTime      <span class="func">@default</span>(<span class="func">now</span>())
+  updatedAt  DateTime      <span class="func">@updatedAt</span>
+  order      Order         <span class="func">@relation</span>(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+<span class="kw">model</span> <span class="type">ExchangeRate</span> {
+  id            String   <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  rate          Decimal  <span class="func">@db.Decimal</span>(12, 2) <span class="comment">// VES por 1 USD</span>
+  source        String   <span class="func">@default</span>(<span class="str">"BCV"</span>)
+  effectiveDate DateTime <span class="func">@db.Date</span>
+  createdAt     DateTime <span class="func">@default</span>(<span class="func">now</span>())
+
+  <span class="func">@@unique</span>([source, effectiveDate])
+}
+
+<span class="kw">model</span> <span class="type">PushToken</span> {
+  id        String   <span class="func">@id</span> <span class="func">@default</span>(<span class="func">cuid</span>())
+  userId    String
+  token     String   <span class="func">@unique</span> <span class="comment">// ExponentPushToken[xxxx]</span>
+  platform  String   <span class="comment">// "ios" | "android"</span>
+  createdAt DateTime <span class="func">@default</span>(<span class="func">now</span>())
+  user      User     <span class="func">@relation</span>(fields: [userId], references: [id], onDelete: Cascade)
+
+  <span class="func">@@index</span>([userId])
+}</code></pre>
+
+        <h3>Decisiones de diseño explicadas</h3>
+        <table>
+            <thead><tr><th>Decisión</th><th>Por qué</th></tr></thead>
+            <tbody>
+                <tr><td><code>Decimal</code> para dinero, nunca <code>Float</code></td><td>Los flotantes tienen errores de redondeo binario (<code>0.1 + 0.2 ≠ 0.3</code>). En dinero es inaceptable. PostgreSQL <code>DECIMAL</code> es exacto.</td></tr>
+                <tr><td><code>onDelete: Cascade</code> en items, <code>SetNull</code> en producto del item</td><td>Si se borra un pedido, sus líneas mueren con él. Pero si se borra un <em>producto</em> del catálogo, el pedido histórico conserva su línea (con el snapshot de nombre/precio) y solo pierde el enlace.</td></tr>
+                <tr><td>Índices en <code>(storeId, status)</code> y <code>(customerId, createdAt)</code></td><td>Son las consultas calientes: "pedidos activos del negocio" (dashboard) e "historial del cliente". Sin índices, esas queries escanean toda la tabla.</td></tr>
+                <tr><td><code>cuid()</code> en vez de autoincremental</td><td>IDs no predecibles (seguridad: nadie adivina <code>/orders/105</code>) y generables sin consultar la BD.</td></tr>
+                <tr><td><code>updatedAt @updatedAt</code></td><td>Prisma lo actualiza solo. Útil para auditoría y para ordenar la cola del dashboard.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Seed data</h3>
+        <p>El archivo <code>prisma/seed.ts</code> debe crear: la tienda única, un usuario admin (<code>admin@delilocal.com</code>), un cliente de prueba, 3-4 categorías, 8-12 productos con imágenes y la tasa del día. Se ejecuta con <code>npx prisma db seed</code>.</p>
+
+        <div class="callout callout-success">
+            <span class="callout-icon">&#9989;</span>
+            <p><strong>Verificación:</strong> tras correr migraciones y seed, abre <code>npx prisma studio</code> — verás todas las tablas con datos navegables en el navegador. Es el "SQL Server Management Studio" de Prisma.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 8. API ==================== -->
+    <section id="api">
+        <h2>API REST (NestJS)</h2>
+
+        <h3>Convenciones de la API</h3>
+        <ul>
+            <li><strong>Base URL:</strong> <code>/api/v1</code> (versionado desde el día uno).</li>
+            <li><strong>Respuestas:</strong> JSON. Errores con formato uniforme <code>{ statusCode, message, error, timestamp, path }</code> (NestJS lo da gratis con filtros de excepción).</li>
+            <li><strong>Validación:</strong> todo DTO se valida con <code>class-validator</code> + <code>ValidationPipe</code> global con <code>whitelist: true</code> (rechaza campos no declarados).</li>
+            <li><strong>Documentación:</strong> Swagger autogenerado en <code>/api/docs</code> con <code>@nestjs/swagger</code>.</li>
+            <li><strong>Paginación:</strong> listas con <code>?page=1&limit=20</code>, respuesta <code>{ data: [], total, page, totalPages }</code>.</li>
+        </ul>
+
+        <h3>Mapa de endpoints</h3>
+        <table>
+            <thead><tr><th>Método</th><th>Endpoint</th><th>Rol</th><th>Descripción</th></tr></thead>
+            <tbody>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/auth/register</code></td><td>Público</td><td>Registro de cliente</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/auth/login</code></td><td>Público</td><td>Login → access + refresh token</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/auth/refresh</code></td><td>Público</td><td>Renovar access token</td></tr>
+                <tr><td><span class="tag tag-p3">GET</span></td><td><code>/users/me</code></td><td>Todos</td><td>Perfil propio</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/users/me/addresses</code></td><td>Customer</td><td>Crear dirección</td></tr>
+                <tr><td><span class="tag tag-p3">GET</span></td><td><code>/catalog/categories</code></td><td>Público</td><td>Categorías con productos disponibles</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/catalog/products</code></td><td>Admin</td><td>Crear producto (imagen → Cloudinary)</td></tr>
+                <tr><td><span class="tag tag-p1">PATCH</span></td><td><code>/catalog/products/:id</code></td><td>Admin</td><td>Editar precio, disponibilidad, etc.</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/orders</code></td><td>Customer</td><td>Crear pedido (valida items, calcula totales)</td></tr>
+                <tr><td><span class="tag tag-p3">GET</span></td><td><code>/orders/my</code></td><td>Customer</td><td>Historial propio (paginado)</td></tr>
+                <tr><td><span class="tag tag-p3">GET</span></td><td><code>/orders/:id</code></td><td>Dueño/Admin</td><td>Detalle del pedido</td></tr>
+                <tr><td><span class="tag tag-p3">GET</span></td><td><code>/orders?status=</code></td><td>Admin/Staff</td><td>Cola de pedidos del negocio</td></tr>
+                <tr><td><span class="tag tag-p1">PATCH</span></td><td><code>/orders/:id/status</code></td><td>Admin/Staff</td><td>Cambiar estado (valida máquina de estados)</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/orders/:id/payment</code></td><td>Customer</td><td>Reportar referencia de pago</td></tr>
+                <tr><td><span class="tag tag-p1">PATCH</span></td><td><code>/orders/:id/payment/verify</code></td><td>Admin</td><td>Verificar o rechazar pago</td></tr>
+                <tr><td><span class="tag tag-p3">GET</span></td><td><code>/exchange-rate/today</code></td><td>Público</td><td>Tasa USD/VES actual</td></tr>
+                <tr><td><span class="tag tag-p2">POST</span></td><td><code>/notifications/push-token</code></td><td>Todos</td><td>Registrar token del dispositivo</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Ejemplo: el endpoint más importante (crear pedido)</h3>
+        <div class="code-header"><span>apps/api/src/orders/orders.service.ts (extracto)</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="func">@Injectable</span>()
+<span class="kw">export class</span> <span class="type">OrdersService</span> {
+  <span class="kw">constructor</span>(
+    <span class="kw">private readonly</span> prisma: <span class="type">PrismaService</span>,
+    <span class="kw">private readonly</span> realtime: <span class="type">RealtimeGateway</span>,
+    <span class="kw">private readonly</span> rates: <span class="type">ExchangeRateService</span>,
+  ) {}
+
+  <span class="kw">async</span> <span class="func">create</span>(customerId: <span class="type">string</span>, dto: <span class="type">CreateOrderDto</span>) {
+    <span class="comment">// 1. Traer productos reales de la BD — NUNCA confiar en precios del cliente</span>
+    <span class="kw">const</span> products = <span class="kw">await this</span>.prisma.product.<span class="func">findMany</span>({
+      where: { id: { <span class="kw">in</span>: dto.items.<span class="func">map</span>(i => i.productId) }, isAvailable: <span class="kw">true</span> },
+    });
+    <span class="kw">if</span> (products.length !== dto.items.length)
+      <span class="kw">throw new</span> <span class="func">BadRequestException</span>(<span class="str">'Hay productos no disponibles'</span>);
+
+    <span class="comment">// 2. Calcular totales en servidor con precios de la BD</span>
+    <span class="kw">const</span> subtotal = dto.items.<span class="func">reduce</span>((sum, item) => {
+      <span class="kw">const</span> p = products.<span class="func">find</span>(p => p.id === item.productId)!;
+      <span class="kw">return</span> sum + <span class="func">Number</span>(p.priceUsd) * item.quantity;
+    }, <span class="num">0</span>);
+
+    <span class="kw">const</span> rate = <span class="kw">await this</span>.rates.<span class="func">getTodayRate</span>();
+    <span class="kw">const</span> store = <span class="kw">await this</span>.prisma.store.<span class="func">findFirstOrThrow</span>();
+    <span class="kw">const</span> total = subtotal + <span class="func">Number</span>(store.deliveryFeeUsd);
+
+    <span class="comment">// 3. Persistir pedido + items + snapshots en una transacción</span>
+    <span class="kw">const</span> order = <span class="kw">await this</span>.prisma.order.<span class="func">create</span>({
+      data: {
+        orderNumber: <span class="kw">await this</span>.<span class="func">generateOrderNumber</span>(),
+        storeId: store.id, customerId,
+        status: <span class="str">'PENDING'</span>,
+        paymentMethod: dto.paymentMethod,
+        subtotalUsd: subtotal,
+        deliveryFeeUsd: store.deliveryFeeUsd,
+        totalUsd: total,
+        exchangeRate: rate,
+        totalVes: total * rate,
+        notes: dto.notes, addressId: dto.addressId,
+        items: { create: dto.items.<span class="func">map</span>(i => {
+          <span class="kw">const</span> p = products.<span class="func">find</span>(p => p.id === i.productId)!;
+          <span class="kw">return</span> { productId: p.id, productName: p.name,
+                   unitPriceUsd: p.priceUsd, quantity: i.quantity, notes: i.notes };
+        })},
+      },
+      include: { items: <span class="kw">true</span> },
+    });
+
+    <span class="comment">// 4. Notificar al negocio en tiempo real</span>
+    <span class="kw">this</span>.realtime.<span class="func">emitToAdmins</span>(<span class="str">'order:created'</span>, order);
+    <span class="kw">return</span> order;
+  }
+}</code></pre>
+
+        <div class="callout callout-danger">
+            <span class="callout-icon">&#128680;</span>
+            <p><strong>Regla de seguridad #1 de cualquier e-commerce:</strong> los precios <em>jamás</em> se toman del request del cliente. El cliente envía solo <code>productId</code> y <code>quantity</code>; el servidor busca el precio real en la base de datos. De lo contrario, alguien puede editar el request y pedirse todo a $0.01.</p>
+        </div>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: la anatomía de un módulo NestJS</div>
+            <p><strong>Controller</strong> = recibe HTTP, valida el DTO, delega (≈ tu Controller de ASP.NET). <strong>Service</strong> = lógica de negocio, inyectado por constructor (≈ tus servicios de Application). <strong>Module</strong> = declara qué controllers y providers existen y qué exporta a otros módulos (≈ registrar servicios en <code>Program.cs</code>). <strong>DTO</strong> = clase con decoradores <code>@IsString()</code>, <code>@Min(1)</code> que NestJS valida automáticamente (≈ DataAnnotations). <strong>Guard</strong> = decide si el request puede pasar (≈ middleware de autorización / policies).</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 9. WEBSOCKETS ==================== -->
+    <section id="websockets">
+        <h2>WebSockets en Tiempo Real</h2>
+
+        <h3>Diseño del canal</h3>
+        <p>Usamos <strong>Socket.IO</strong> (no WebSocket crudo) porque añade reconexión automática, salas (rooms) y fallback a polling — gratis.</p>
+
+        <table>
+            <thead><tr><th>Concepto</th><th>Valor</th></tr></thead>
+            <tbody>
+                <tr><td>Namespace</td><td><code>/realtime</code></td></tr>
+                <tr><td>Autenticación</td><td>JWT enviado en el handshake (<code>auth: { token }</code>), verificado por un Guard de WS</td></tr>
+                <tr><td>Room <code>store:admins</code></td><td>Todos los ADMIN/STAFF conectados entran aquí al conectar</td></tr>
+                <tr><td>Room <code>order:{orderId}</code></td><td>El cliente dueño del pedido se une para seguimiento en vivo</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Eventos (servidor → cliente)</h3>
+        <table>
+            <thead><tr><th>Evento</th><th>Room destino</th><th>Payload</th><th>Cuándo</th></tr></thead>
+            <tbody>
+                <tr><td><code>order:created</code></td><td><code>store:admins</code></td><td>Pedido completo</td><td>Cliente crea pedido</td></tr>
+                <tr><td><code>order:updated</code></td><td><code>order:{id}</code> + <code>store:admins</code></td><td><code>{ orderId, status, updatedAt }</code></td><td>Cambio de estado</td></tr>
+                <tr><td><code>payment:reported</code></td><td><code>store:admins</code></td><td><code>{ orderId, method, reference }</code></td><td>Cliente reporta pago</td></tr>
+                <tr><td><code>store:toggled</code></td><td>todos</td><td><code>{ isOpen }</code></td><td>Negocio abre/cierra</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Gateway de NestJS</h3>
+        <div class="code-header"><span>apps/api/src/realtime/realtime.gateway.ts</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="func">@WebSocketGateway</span>({ namespace: <span class="str">'/realtime'</span>, cors: { origin: <span class="kw">true</span> } })
+<span class="kw">export class</span> <span class="type">RealtimeGateway</span> <span class="kw">implements</span> <span class="type">OnGatewayConnection</span> {
+  <span class="func">@WebSocketServer</span>() server: <span class="type">Server</span>;
+
+  <span class="kw">constructor</span>(<span class="kw">private readonly</span> jwt: <span class="type">JwtService</span>) {}
+
+  <span class="comment">// Se ejecuta en cada conexión: autenticar y unir a rooms</span>
+  <span class="kw">async</span> <span class="func">handleConnection</span>(socket: <span class="type">Socket</span>) {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> payload = <span class="kw">await this</span>.jwt.<span class="func">verifyAsync</span>(socket.handshake.auth.token);
+      socket.data.user = payload;  <span class="comment">// { sub, role }</span>
+
+      <span class="kw">if</span> (payload.role === <span class="str">'ADMIN'</span> || payload.role === <span class="str">'STAFF'</span>)
+        socket.<span class="func">join</span>(<span class="str">'store:admins'</span>);
+    } <span class="kw">catch</span> {
+      socket.<span class="func">disconnect</span>();  <span class="comment">// sin JWT válido no hay canal</span>
+    }
+  }
+
+  <span class="comment">// El cliente llama esto para seguir un pedido suyo</span>
+  <span class="func">@SubscribeMessage</span>(<span class="str">'order:watch'</span>)
+  <span class="kw">async</span> <span class="func">watchOrder</span>(<span class="func">@ConnectedSocket</span>() socket: <span class="type">Socket</span>,
+                   <span class="func">@MessageBody</span>() orderId: <span class="type">string</span>) {
+    <span class="comment">// TODO: verificar que socket.data.user.sub es dueño del pedido (o admin)</span>
+    socket.<span class="func">join</span>(<span class="str">`order:</span>${orderId}<span class="str">`</span>);
+  }
+
+  <span class="func">emitToAdmins</span>(event: <span class="type">string</span>, data: <span class="type">unknown</span>) {
+    <span class="kw">this</span>.server.<span class="func">to</span>(<span class="str">'store:admins'</span>).<span class="func">emit</span>(event, data);
+  }
+
+  <span class="func">emitToOrder</span>(orderId: <span class="type">string</span>, event: <span class="type">string</span>, data: <span class="type">unknown</span>) {
+    <span class="kw">this</span>.server.<span class="func">to</span>(<span class="str">`order:</span>${orderId}<span class="str">`</span>).<span class="func">emit</span>(event, data);
+  }
+}</code></pre>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: ¿qué es una "room"?</div>
+            <p>Una room es un canal con nombre dentro de la conexión WebSocket. En lugar de enviar un evento a <em>todos</em> los conectados (<code>server.emit</code>), lo envías solo a quienes se unieron a esa sala (<code>server.to('order:abc').emit</code>). Es lo mismo que los <strong>grupos de SignalR</strong> que quizás usaste en Blazor. Sin rooms, cada cliente recibiría los pedidos de todos los demás — un problema de privacidad y de tráfico.</p>
+        </div>
+
+        <div class="callout callout-warning">
+            <span class="callout-icon">&#9888;</span>
+            <p><strong>Importante:</strong> los nombres de eventos (<code>order:created</code>, etc.) deben definirse como constantes en <code>packages/shared/src/constants/ws-events.ts</code> e importarse en API, web y móvil. Un typo en un string de evento es un bug silencioso muy difícil de encontrar.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 10. AUTH ==================== -->
+    <section id="auth">
+        <h2>Autenticación y Seguridad</h2>
+
+        <h3>Esquema de tokens</h3>
+        <table>
+            <thead><tr><th>Token</th><th>Duración</th><th>Dónde se guarda</th><th>Propósito</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Access token</strong> (JWT)</td><td>15 min</td><td>Memoria (web) / SecureStore (móvil)</td><td>Autenticar cada request REST y el handshake WS</td></tr>
+                <tr><td><strong>Refresh token</strong> (JWT)</td><td>30 días</td><td>HttpOnly cookie (web) / SecureStore (móvil)</td><td>Obtener access tokens nuevos sin re-login</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Reglas de seguridad del proyecto</h3>
+        <ol class="step-list">
+            <li><span class="step-num">1</span><strong>Contraseñas con bcrypt</strong> (cost factor 12). Nunca en texto plano, nunca en logs, nunca en respuestas de la API.</li>
+            <li><span class="step-num">2</span><strong>Autorización por roles con Guards:</strong> decorador <code>@Roles('ADMIN')</code> + <code>RolesGuard</code> que lee el rol del JWT. El rol <em>siempre</em> se lee del token firmado, nunca del body.</li>
+            <li><span class="step-num">3</span><strong>Propiedad de recursos:</strong> un CUSTOMER solo ve sus propios pedidos. Verificar <code>order.customerId === user.sub</code> en el service, además del guard.</li>
+            <li><span class="step-num">4</span><strong>Rate limiting:</strong> <code>@nestjs/throttler</code> — máx. 10 req/min en <code>/auth/login</code> (anti fuerza bruta), 100 req/min global.</li>
+            <li><span class="step-num">5</span><strong>Helmet + CORS estricto:</strong> helmet activado; CORS solo para los orígenes de la web (y Expo en dev).</li>
+            <li><span class="step-num">6</span><strong>Validación total de entrada:</strong> <code>ValidationPipe</code> global con <code>whitelist: true</code> y <code>forbidNonWhitelisted: true</code>.</li>
+            <li><span class="step-num">7</span><strong>Secretos en variables de entorno:</strong> validados al arranque con <code>class-validator</code> en <code>config/env.validation.ts</code>. Si falta <code>JWT_SECRET</code>, la app no arranca (fail fast).</li>
+            <li><span class="step-num">8</span><strong>SQL injection:</strong> imposible usando Prisma (queries parametrizadas). Prohibido <code>$queryRawUnsafe</code> con interpolación de strings.</li>
+        </ol>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: ¿por qué dos tokens y no uno solo?</div>
+            <p>Un access token corto (15 min) limita el daño si es robado: el atacante solo lo usa un rato. El refresh token largo permite no pedir login cada 15 minutos. Si el refresh se compromete, se puede revocar en servidor. Este patrón (<strong>access + refresh</strong>) es el estándar de la industria y casi seguro te lo preguntarán en entrevistas.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 11. WEB ==================== -->
+    <section id="web">
+        <h2>Frontend Web (Next.js 14)</h2>
+
+        <h3>Mapa de rutas</h3>
+        <table>
+            <thead><tr><th>Ruta</th><th>Público</th><th>Descripción</th></tr></thead>
+            <tbody>
+                <tr><td><code>/</code></td><td>Cliente</td><td>Catálogo con categorías y buscador</td></tr>
+                <tr><td><code>/cart</code></td><td>Cliente</td><td>Carrito (persiste en localStorage)</td></tr>
+                <tr><td><code>/checkout</code></td><td>Cliente (auth)</td><td>Dirección, método de pago, notas, resumen USD/VES</td></tr>
+                <tr><td><code>/orders</code></td><td>Cliente (auth)</td><td>Historial de pedidos</td></tr>
+                <tr><td><code>/orders/[id]</code></td><td>Cliente (auth)</td><td>Seguimiento en vivo (timeline + WebSocket)</td></tr>
+                <tr><td><code>/login</code>, <code>/register</code></td><td>Público</td><td>Autenticación</td></tr>
+                <tr><td><code>/admin</code></td><td>Admin/Staff</td><td>Dashboard: cola de pedidos en tiempo real</td></tr>
+                <tr><td><code>/admin/menu</code></td><td>Admin</td><td>CRUD de productos y categorías</td></tr>
+                <tr><td><code>/admin/settings</code></td><td>Admin</td><td>Datos del negocio, tasa manual, abrir/cerrar tienda</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Decisiones técnicas web</h3>
+        <ul>
+            <li><strong>Server Components por defecto:</strong> el catálogo se renderiza en servidor (rápido, SEO). Solo son <code>'use client'</code> los componentes interactivos (carrito, botones, seguimiento en vivo).</li>
+            <li><strong>Estado del carrito:</strong> <code>Zustand</code> + persistencia en localStorage. No uses Redux para esto — es excesivo.</li>
+            <li><strong>Data fetching:</strong> <code>fetch</code> nativo en Server Components; <code>TanStack Query</code> en componentes cliente que necesitan revalidación (pedidos, dashboard).</li>
+            <li><strong>Formularios:</strong> <code>react-hook-form</code> + <code>zod</code> con los schemas de <code>@delilocal/shared</code>.</li>
+            <li><strong>UI:</strong> componentes de <code>shadcn/ui</code> (Button, Card, Dialog, Badge, Sheet, Toast) personalizados con la paleta del negocio.</li>
+        </ul>
+
+        <h3>El dashboard en tiempo real (pieza estrella)</h3>
+        <div class="code-header"><span>apps/web/app/(admin)/admin/page.tsx (extracto)</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="str">'use client'</span>;
+<span class="kw">export default function</span> <span class="func">AdminDashboard</span>() {
+  <span class="kw">const</span> { data: orders } = <span class="func">useQuery</span>({
+    queryKey: [<span class="str">'orders'</span>, <span class="str">'active'</span>],
+    queryFn: () => api.<span class="func">getActiveOrders</span>(),
+  });
+
+  <span class="func">useEffect</span>(() => {
+    <span class="kw">const</span> socket = <span class="func">connectSocket</span>();  <span class="comment">// lib/socket-client.ts (con JWT)</span>
+
+    socket.<span class="func">on</span>(<span class="type">WS_EVENTS</span>.ORDER_CREATED, (order) => {
+      <span class="func">playNotificationSound</span>();       <span class="comment">// &#128276; clave para el negocio</span>
+      queryClient.<span class="func">invalidateQueries</span>([<span class="str">'orders'</span>]);
+      toast.<span class="func">info</span>(<span class="str">`¡Nuevo pedido #</span>${order.orderNumber}<span class="str">!`</span>);
+    });
+
+    socket.<span class="func">on</span>(<span class="type">WS_EVENTS</span>.ORDER_UPDATED, () =>
+      queryClient.<span class="func">invalidateQueries</span>([<span class="str">'orders'</span>]));
+
+    <span class="kw">return</span> () => socket.<span class="func">disconnect</span>();
+  }, []);
+
+  <span class="comment">// Render: columnas por estado (kanban simple)</span>
+  <span class="comment">// PENDING → CONFIRMED → PREPARING → READY, cada tarjeta con botón</span>
+  <span class="comment">// para avanzar al siguiente estado legal (según ORDER_TRANSITIONS)</span>
+}</code></pre>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: Server vs Client Components</div>
+            <p>En el App Router, <strong>todo componente es de servidor por defecto</strong>: se ejecuta en el servidor y manda HTML al navegador (cero JavaScript enviado, carga rapidísima). Cuando necesitas interactividad (<code>useState</code>, <code>useEffect</code>, onClick), marcas el componente con <code>'use client'</code> y React lo "hidrata" en el navegador. La regla práctica: <em>empuja los 'use client' lo más abajo posible en el árbol</em> — la página es server, solo el botón es client.</p>
+        </div>
+
+        <h3>Checklist de UX web</h3>
+        <ul>
+            <li>Precios siempre en <strong>doble moneda</strong>: <code>$5.00 · Bs. 542,50</code> (tasa visible en el header).</li>
+            <li>Estados de carga con <strong>skeletons</strong> (no spinners genéricos).</li>
+            <li>Estados vacíos diseñados ("Aún no tienes pedidos" + botón al catálogo).</li>
+            <li>Errores de API traducidos a mensajes humanos en español.</li>
+            <li>Responsive primero móvil: el 80% de los clientes entrará desde el teléfono.</li>
+        </ul>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 12. MOBILE ==================== -->
+    <section id="mobile">
+        <h2>App Móvil (React Native + Expo)</h2>
+
+        <h3>Navegación (Expo Router)</h3>
+        <div class="ascii-diagram"><span class="tree-dir">app/</span>
+├── <span class="tree-file">_layout.tsx</span>          <span class="tree-file"># providers (QueryClient, Auth, Socket)</span>
+├── <span class="tree-file">index.tsx</span>            <span class="tree-file"># redirige según auth → /(tabs) o /login</span>
+├── <span class="tree-dir">(auth)/</span>
+│   ├── <span class="tree-file">login.tsx</span>
+│   └── <span class="tree-file">register.tsx</span>
+├── <span class="tree-dir">(tabs)/</span>               <span class="tree-file"># bottom tabs del cliente</span>
+│   ├── <span class="tree-file">index.tsx</span>          <span class="tree-file"># catálogo</span>
+│   ├── <span class="tree-file">cart.tsx</span>           <span class="tree-file"># carrito</span>
+│   ├── <span class="tree-file">orders.tsx</span>         <span class="tree-file"># mis pedidos</span>
+│   └── <span class="tree-file">profile.tsx</span>        <span class="tree-file"># perfil, direcciones, logout</span>
+├── <span class="tree-dir">order/</span>
+│   └── <span class="tree-file">[id].tsx</span>           <span class="tree-file"># seguimiento en vivo del pedido</span>
+├── <span class="tree-file">checkout.tsx</span>         <span class="tree-file"># modal de checkout</span>
+└── <span class="tree-dir">(admin)/</span>              <span class="tree-file"># solo visible si role ≠ CUSTOMER</span>
+    └── <span class="tree-file">orders.tsx</span>         <span class="tree-file"># cola de pedidos para staff</span></div>
+
+        <h3>Librerías móviles clave</h3>
+        <table>
+            <thead><tr><th>Librería</th><th>Para qué</th></tr></thead>
+            <tbody>
+                <tr><td><code>expo-router</code></td><td>Navegación por archivos (como Next.js — ya la conocerás)</td></tr>
+                <tr><td><code>expo-notifications</code></td><td>Push notifications + permiso + token del dispositivo</td></tr>
+                <tr><td><code>expo-secure-store</code></td><td>Guardar JWT de forma cifrada (Keychain/Keystore)</td></tr>
+                <tr><td><code>@tanstack/react-query</code></td><td>Data fetching con caché (misma librería que en web)</td></tr>
+                <tr><td><code>zustand</code></td><td>Carrito (misma librería que en web)</td></tr>
+                <tr><td><code>socket.io-client</code></td><td>Tiempo real (mismo cliente que en web)</td></tr>
+                <tr><td><code>react-hook-form + zod</code></td><td>Formularios con los schemas compartidos</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Push notifications (flujo completo)</h3>
+        <ol class="step-list">
+            <li><span class="step-num">1</span>Al iniciar sesión, la app pide permiso y obtiene el <code>ExpoPushToken</code> del dispositivo.</li>
+            <li><span class="step-num">2</span>Lo envía a <code>POST /notifications/push-token</code> → se guarda en la tabla <code>PushToken</code> asociado al usuario.</li>
+            <li><span class="step-num">3</span>Cuando el pedido cambia de estado, el backend busca los tokens del cliente y envía la notificación vía la API de Expo (<code>expo-server-sdk</code>).</li>
+            <li><span class="step-num">4</span>Al tocar la notificación, la app abre directamente <code>/order/[id]</code> (deep link).</li>
+        </ol>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: Expo Go vs Development Build</div>
+            <p><strong>Expo Go</strong> es una app que instalas de la tienda y ejecuta tu código al instante (ideal para desarrollo, escaneas un QR y listo). Un <strong>Development Build</strong> es tu propia app compilada con librerías nativas personalizadas (se genera en la nube con <code>eas build</code>). Para este MVP, Expo Go es suficiente; para publicar en tiendas necesitarás EAS Build. Las push notifications funcionan en ambos.</p>
+        </div>
+
+        <div class="callout callout-info">
+            <span class="callout-icon">&#8505;</span>
+            <p><strong>Diferencia clave con la web:</strong> en móvil no hay <code>localStorage</code> ni cookies — los tokens van en <code>expo-secure-store</code> y se envían manualmente en el header <code>Authorization: Bearer ...</code>. El carrito persiste con <code>AsyncStorage</code> vía el middleware de persistencia de Zustand.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 13. DOBLE MONEDA ==================== -->
+    <section id="moneda">
+        <h2>Manejo de Doble Moneda (USD / VES)</h2>
+        <p>Esta es la feature que hace a DeliLocal realmente venezolano. Los precios se definen en USD pero los clientes pagan frecuentemente en bolívares.</p>
+
+        <h3>Reglas</h3>
+        <ol>
+            <li><strong>El USD es la moneda base.</strong> Productos, totales y fees se almacenan en USD. El VES es siempre una <em>conversión de exhibición</em> (salvo el snapshot <code>totalVes</code> del pedido).</li>
+            <li><strong>Una sola tasa por día</strong> (tabla <code>ExchangeRate</code>), obtenida de una API pública del BCV. El admin puede ajustarla manualmente desde <code>/admin/settings</code> (la API puede fallar).</li>
+            <li><strong>Snapshot al comprar:</strong> el pedido guarda la tasa usada. El cliente paga según la tasa <em>del momento de su pedido</em>, no la de mañana.</li>
+            <li><strong>Redondeo:</strong> VES se muestra con 2 decimales usando redondeo half-up. Toda conversión pasa por las utilidades de <code>@delilocal/shared</code>.</li>
+        </ol>
+
+        <div class="code-header"><span>packages/shared/src/utils/money.ts</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="comment">// NUNCA uses operaciones de float crudas para mostrar dinero</span>
+<span class="kw">export function</span> <span class="func">usdToVes</span>(usd: <span class="type">number</span>, rate: <span class="type">number</span>): <span class="type">number</span> {
+  <span class="comment">// Trabajar en centavos para evitar errores de punto flotante</span>
+  <span class="kw">return</span> <span class="type">Math</span>.<span class="func">round</span>(usd * <span class="num">100</span> * rate) / <span class="num">100</span>;
+}
+
+<span class="kw">export function</span> <span class="func">formatUsd</span>(amount: <span class="type">number</span>): <span class="type">string</span> {
+  <span class="kw">return</span> <span class="str">`$</span>${amount.toFixed(<span class="num">2</span>)}<span class="str">`</span>;
+}
+
+<span class="kw">export function</span> <span class="func">formatVes</span>(amount: <span class="type">number</span>): <span class="type">string</span> {
+  <span class="kw">return</span> <span class="str">`Bs. </span>${amount.toLocaleString(<span class="str">'es-VE'</span>, {
+    minimumFractionDigits: <span class="num">2</span>, maximumFractionDigits: <span class="num">2</span>,
+  })}<span class="str">`</span>;
+}</code></pre>
+
+        <div class="callout callout-warning">
+            <span class="callout-icon">&#9888;</span>
+            <p><strong>Para producción real</strong> considera <code>Decimal.js</code> o <code>dinero.js</code> para aritmética monetaria exacta en JavaScript. Para el MVP, el truco de centavos de arriba es suficiente, pero debes saber por qué existe el problema.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 14. MVP ==================== -->
+    <section id="mvp">
+        <h2>Features del MVP — Priorización</h2>
+
+        <h3>Definición de prioridades</h3>
+        <ul>
+            <li><span class="tag tag-p0">P0 - Crítico</span>: Sin esto no hay producto. Va en la primera versión.</li>
+            <li><span class="tag tag-p1">P1 - Alta</span>: Completa la experiencia core. Segunda iteración del MVP.</li>
+            <li><span class="tag tag-p2">P2 - Media</span>: Mejora la usabilidad. Post-MVP cercano.</li>
+            <li><span class="tag tag-p3">P3 - Baja</span>: Nice to have. Versiones futuras.</li>
+        </ul>
+
+        <table>
+            <thead><tr><th>Feature</th><th>Prioridad</th><th>Plataforma</th></tr></thead>
+            <tbody>
+                <tr><td>Registro / login (JWT + refresh)</td><td><span class="tag tag-p0">P0</span></td><td>Web + Móvil</td></tr>
+                <tr><td>Catálogo con categorías e imágenes</td><td><span class="tag tag-p0">P0</span></td><td>Web + Móvil</td></tr>
+                <tr><td>Carrito persistente</td><td><span class="tag tag-p0">P0</span></td><td>Web + Móvil</td></tr>
+                <tr><td>Checkout (dirección, método de pago, notas)</td><td><span class="tag tag-p0">P0</span></td><td>Web + Móvil</td></tr>
+                <tr><td>Creación de pedido con cálculo de totales en servidor</td><td><span class="tag tag-p0">P0</span></td><td>API</td></tr>
+                <tr><td>Dashboard del negocio con cola de pedidos en tiempo real</td><td><span class="tag tag-p0">P0</span></td><td>Web</td></tr>
+                <tr><td>Cambio de estados con máquina de estados + WebSocket</td><td><span class="tag tag-p0">P0</span></td><td>API + Web</td></tr>
+                <tr><td>Seguimiento del pedido en vivo (cliente)</td><td><span class="tag tag-p0">P0</span></td><td>Web + Móvil</td></tr>
+                <tr><td>Precios en doble moneda USD/VES + tasa del día</td><td><span class="tag tag-p0">P0</span></td><td>Todas</td></tr>
+                <tr><td>CRUD de productos y categorías (admin)</td><td><span class="tag tag-p1">P1</span></td><td>Web</td></tr>
+                <tr><td>Reporte y verificación de pago (referencia)</td><td><span class="tag tag-p1">P1</span></td><td>Todas</td></tr>
+                <tr><td>Push notifications de cambio de estado</td><td><span class="tag tag-p1">P1</span></td><td>Móvil</td></tr>
+                <tr><td>Direcciones guardadas del cliente</td><td><span class="tag tag-p1">P1</span></td><td>Todas</td></tr>
+                <tr><td>Historial de pedidos con "repetir pedido"</td><td><span class="tag tag-p1">P1</span></td><td>Todas</td></tr>
+                <tr><td>Abrir/cerrar tienda (toggle)</td><td><span class="tag tag-p1">P1</span></td><td>Web</td></tr>
+                <tr><td>Cola de pedidos en app móvil para staff</td><td><span class="tag tag-p2">P2</span></td><td>Móvil</td></tr>
+                <tr><td>Enviar resumen del pedido por WhatsApp</td><td><span class="tag tag-p2">P2</span></td><td>Todas</td></tr>
+                <tr><td>Buscador de productos</td><td><span class="tag tag-p2">P2</span></td><td>Todas</td></tr>
+                <tr><td>Estadísticas básicas del negocio (ventas del día)</td><td><span class="tag tag-p2">P2</span></td><td>Web</td></tr>
+                <tr><td>Cupones de descuento</td><td><span class="tag tag-p3">P3</span></td><td>Todas</td></tr>
+                <tr><td>Multi-tienda / marketplace</td><td><span class="tag tag-p3">P3</span></td><td>Todas</td></tr>
+                <tr><td>Pasarela de pago real</td><td><span class="tag tag-p3">P3</span></td><td>Todas</td></tr>
+                <tr><td>App para repartidores</td><td><span class="tag tag-p3">P3</span></td><td>Móvil</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 15. PLAN ==================== -->
+    <section id="plan">
+        <h2>Plan de Desarrollo Paso a Paso</h2>
+        <p>Este es el corazón del documento. Ocho fases ordenadas, cada una con pasos concretos, un <strong>entregable verificable</strong> y una caja <em>&#127891; Aprende</em> con los conceptos que dominarás. Ritmo estimado: 10-15 horas/semana.</p>
+
+        <!-- FASE 1 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 1</span>
+                <h4 class="phase-title">Fundamentos y Monorepo</h4>
+                <span class="phase-weeks">Semanas 1-2</span>
+            </div>
+            <p>Sentar las bases: TypeScript, la estructura del monorepo y el esqueleto de las tres apps corriendo.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>Setup del monorepo:</strong> <code>npm create turbo@latest delilocal</code>, configurar npm workspaces con <code>apps/*</code> y <code>packages/*</code>.</li>
+                <li><span class="step-num">2</span><strong>Crear el paquete shared:</strong> <code>packages/shared</code> con los enums (<code>OrderStatus</code>, <code>Role</code>), tipos base, <code>ORDER_TRANSITIONS</code> y utilidades de dinero.</li>
+                <li><span class="step-num">3</span><strong>Esqueleto de la API:</strong> <code>nest new api</code> dentro de <code>apps/</code>, mover a TypeScript estricto, configurar <code>ConfigModule</code> con validación de variables de entorno.</li>
+                <li><span class="step-num">4</span><strong>Docker Compose para PostgreSQL:</strong> servicio de BD local con volumen persistente (ver sección Comandos).</li>
+                <li><span class="step-num">5</span><strong>Prisma inicial:</strong> instalar, pegar el <code>schema.prisma</code> de la sección 7, primera migración, <code>prisma studio</code> funcionando.</li>
+                <li><span class="step-num">6</span><strong>Esqueleto web:</strong> <code>npx create-next-app@latest web</code> (App Router, Tailwind, TypeScript), instalar shadcn/ui, página de inicio renderizando.</li>
+                <li><span class="step-num">7</span><strong>Esqueleto móvil:</strong> <code>npx create-expo-app mobile</code> con Expo Router, correr en Expo Go en tu teléfono.</li>
+                <li><span class="step-num">8</span><strong>Scripts raíz:</strong> <code>npm run dev</code> en la raíz levanta las tres apps en paralelo vía Turborepo. Commit inicial.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>Cómo funcionan los workspaces de npm, qué hace Turborepo (cachear builds y orquestar tareas), cómo importar un paquete local (<code>@delilocal/shared</code>) desde otra app, y cómo Docker te evita instalar PostgreSQL manualmente. <strong>Fundamento de TypeScript:</strong> interfaces, enums, genéricos básicos — haz los ejercicios de <em>TypeScript Handbook</em> en paralelo esta semana.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> <code>npm run dev</code> levanta API (responde <code>GET /api/v1/health</code>), web (página en localhost:3000) y móvil (Expo Go). Base de datos con tablas creadas. Todo en Git.</p>
+            </div>
+        </div>
+
+        <!-- FASE 2 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 2</span>
+                <h4 class="phase-title">Autenticación y Usuarios</h4>
+                <span class="phase-weeks">Semana 3</span>
+            </div>
+            <p>Sistema completo de auth: registro, login, tokens, roles y protección de rutas en la API.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>AuthModule:</strong> register (bcrypt), login (emite access + refresh), refresh endpoint.</li>
+                <li><span class="step-num">2</span><strong>JwtStrategy + JwtAuthGuard:</strong> Passport con <code>@nestjs/passport</code>. Proteger un endpoint de prueba.</li>
+                <li><span class="step-num">3</span><strong>RolesGuard + decorador <code>@Roles()</code>:</strong> crear <code>CurrentUser</code> como decorador de parámetro.</li>
+                <li><span class="step-num">4</span><strong>UsersModule:</strong> <code>GET /users/me</code>, CRUD de direcciones.</li>
+                <li><span class="step-num">5</span><strong>Seguridad base:</strong> helmet, CORS, throttler en login, ValidationPipe global.</li>
+                <li><span class="step-num">6</span><strong>Seed:</strong> tienda + usuario admin + cliente de prueba + categorías y productos de ejemplo.</li>
+                <li><span class="step-num">7</span><strong>Tests unitarios</strong> de AuthService (login válido/inválido, hashing) con Vitest.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>Cómo funciona JWT por dentro (header.payload.signature, por qué no se puede falsificar), qué es hashing vs cifrado (bcrypt es unidireccional), el patrón Guard de NestJS (≈ middleware de autorización de ASP.NET) y por qué los secretos se validan al arranque.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> desde Swagger/Postman: registrar, loguear, acceder a <code>/users/me</code> con token, recibir 401 sin token y 403 con rol incorrecto. Seed cargado.</p>
+            </div>
+        </div>
+
+        <!-- FASE 3 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 3</span>
+                <h4 class="phase-title">Catálogo y Pedidos (núcleo de la API)</h4>
+                <span class="phase-weeks">Semanas 4-5</span>
+            </div>
+            <p>El corazón del negocio: catálogo público y el ciclo completo del pedido con cálculo de totales en servidor.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>CatalogModule:</strong> endpoints públicos de lectura (categorías con productos) y CRUD admin con subida de imagen a Cloudinary.</li>
+                <li><span class="step-num">2</span><strong>ExchangeRateModule:</strong> servicio que consulta la API del BCV, guarda la tasa diaria, con fallback a tasa manual del admin.</li>
+                <li><span class="step-num">3</span><strong>OrdersModule — crear pedido:</strong> el servicio de la sección 8: validación de disponibilidad, totales en servidor, snapshots, número de orden, transacción Prisma.</li>
+                <li><span class="step-num">4</span><strong>Consultas de pedidos:</strong> <code>GET /orders/my</code> (paginado), <code>GET /orders/:id</code> con verificación de propiedad, <code>GET /orders?status=</code> para admin.</li>
+                <li><span class="step-num">5</span><strong>Cambio de estado:</strong> <code>PATCH /orders/:id/status</code> validando contra <code>ORDER_TRANSITIONS</code> del paquete shared; cancelación con motivo.</li>
+                <li><span class="step-num">6</span><strong>PaymentsModule:</strong> reportar referencia, verificar/rechazar.</li>
+                <li><span class="step-num">7</span><strong>Tests:</strong> máquina de estados (todas las transiciones legales e ilegales), cálculo de totales, regla de "precios solo del servidor".</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>Transacciones de base de datos con Prisma (<code>$transaction</code>), por qué los snapshots protegen datos históricos, diseño de máquinas de estados, y el principio <strong>never trust the client</strong> aplicado a dinero. Estas son las preguntas de diseño de sistemas que hacen en entrevistas senior.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> flujo completo por Swagger: crear pedido → aparece en cola admin → avanzar por todos los estados → reportar y verificar pago. Tests verdes.</p>
+            </div>
+        </div>
+
+        <!-- FASE 4 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 4</span>
+                <h4 class="phase-title">WebSockets en Tiempo Real</h4>
+                <span class="phase-weeks">Semana 6</span>
+            </div>
+            <p>El gateway de Socket.IO, autenticación del canal, rooms y emisión de eventos desde los servicios de pedidos.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>Constantes de eventos</strong> en <code>packages/shared/src/constants/ws-events.ts</code>.</li>
+                <li><span class="step-num">2</span><strong>RealtimeGateway</strong> (código de la sección 9): verificación de JWT en handshake, unión automática de admins a <code>store:admins</code>.</li>
+                <li><span class="step-num">3</span><strong>Mensaje <code>order:watch</code>:</strong> verificar propiedad del pedido antes de unir a la room <code>order:{id}</code>.</li>
+                <li><span class="step-num">4</span><strong>Integrar con OrdersService:</strong> emitir <code>order:created</code> al crear y <code>order:updated</code> en cada cambio de estado.</li>
+                <li><span class="step-num">5</span><strong>Cliente de prueba:</strong> página HTML mínima (o script Node) que se conecta con token y loguea eventos — verificar todo el flujo antes de tocar la web.</li>
+                <li><span class="step-num">6</span><strong>Test de integración:</strong> cliente de socket en test que recibe el evento al crear un pedido.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>Handshake de WebSocket vs HTTP, por qué Socket.IO y no WS crudo (reconexión, rooms, fallbacks), seguridad de canales en tiempo real, y el patrón publicador/suscriptor. Es el equivalente directo de SignalR que conoces de Blazor.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> con dos clientes conectados (uno admin, uno cliente), crear un pedido notifica al admin al instante y cada cambio de estado llega al cliente en vivo.</p>
+            </div>
+        </div>
+
+        <!-- FASE 5 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 5</span>
+                <h4 class="phase-title">Frontend Web — Cliente</h4>
+                <span class="phase-weeks">Semanas 7-8</span>
+            </div>
+            <p>La experiencia completa del cliente en Next.js: catálogo, carrito, checkout y seguimiento en vivo.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>API client tipado</strong> en <code>lib/api-client.ts</code> con manejo de tokens y refresh automático.</li>
+                <li><span class="step-num">2</span><strong>Auth pages:</strong> login/registro con react-hook-form + zod (schemas compartidos), guardado de tokens, rutas protegidas por middleware.</li>
+                <li><span class="step-num">3</span><strong>Catálogo:</strong> Server Component que trae categorías; tarjetas de producto con precio USD/VES; header con tasa del día.</li>
+                <li><span class="step-num">4</span><strong>Carrito con Zustand:</strong> añadir/quitar/cantidades, persistencia en localStorage, totales en vivo.</li>
+                <li><span class="step-num">5</span><strong>Checkout:</strong> selección de dirección, método de pago, notas, resumen final en doble moneda → crea el pedido y redirige al seguimiento.</li>
+                <li><span class="step-num">6</span><strong>Seguimiento en vivo:</strong> página <code>/orders/[id]</code> con timeline visual de estados, conectada al WebSocket (join <code>order:watch</code>), actualización instantánea.</li>
+                <li><span class="step-num">7</span><strong>Historial:</strong> lista de pedidos con badges de estado y botón "repetir pedido".</li>
+                <li><span class="step-num">8</span><strong>Pulido UX:</strong> skeletons, estados vacíos, toasts de error, responsive móvil.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>React moderno en serio: hooks, Server vs Client Components, data fetching con TanStack Query, estado global mínimo con Zustand, formularios performantes con react-hook-form y el patrón de composición de componentes de shadcn/ui. Esto es el 80% de lo que evalúan en entrevistas de frontend.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> un cliente puede registrarse, pedir, y ver su pedido avanzar en vivo. Todo usable desde el navegador del teléfono.</p>
+            </div>
+        </div>
+
+        <!-- FASE 6 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 6</span>
+                <h4 class="phase-title">Dashboard del Negocio (Web Admin)</h4>
+                <span class="phase-weeks">Semana 9</span>
+            </div>
+            <p>El panel que el dueño del negocio usa todos los días: cola en tiempo real, gestión de menú y configuración.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>Layout admin protegido:</strong> verificación de rol, sidebar de navegación.</li>
+                <li><span class="step-num">2</span><strong>Dashboard kanban:</strong> columnas por estado (PENDING → READY), tarjetas con items y totales, sonido de nuevo pedido, conexión WebSocket (código de la sección 11).</li>
+                <li><span class="step-num">3</span><strong>Acciones de estado:</strong> botones que solo ofrecen transiciones legales según <code>ORDER_TRANSITIONS</code>; diálogo de cancelación con motivo.</li>
+                <li><span class="step-num">4</span><strong>Detalle de pedido:</strong> items, dirección, notas, referencia de pago con botones verificar/rechazar.</li>
+                <li><span class="step-num">5</span><strong>Gestión de menú:</strong> CRUD de productos con subida de imagen (preview), toggle de disponibilidad, orden de categorías.</li>
+                <li><span class="step-num">6</span><strong>Configuración:</strong> datos del negocio, delivery fee, tasa manual, toggle abrir/cerrar tienda.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>Diseño de interfaces de trabajo (no solo de consumo): densidad de información, acciones rápidas, confirmaciones destructivas, y cómo el tiempo real cambia la UX (la pantalla se actualiza sola). También invalidación de caché con TanStack Query tras eventos de socket.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> el negocio gestiona todo su día desde el dashboard: recibir pedidos (con sonido), avanzarlos, verificar pagos y editar el menú. <strong>MVP web completo.</strong></p>
+            </div>
+        </div>
+
+        <!-- FASE 7 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 7</span>
+                <h4 class="phase-title">App Móvil con Expo</h4>
+                <span class="phase-weeks">Semanas 10-12</span>
+            </div>
+            <p>Llevar la experiencia del cliente a iOS y Android con push notifications.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>Infraestructura móvil:</strong> providers (QueryClient, auth context), API client compartiendo lógica con web, tokens en SecureStore.</li>
+                <li><span class="step-num">2</span><strong>Auth screens:</strong> login/registro, persistencia de sesión, redirección según estado de auth en <code>_layout.tsx</code>.</li>
+                <li><span class="step-num">3</span><strong>Tabs del cliente:</strong> catálogo (lista con imágenes, precios duales), carrito (Zustand + AsyncStorage), pedidos, perfil con direcciones.</li>
+                <li><span class="step-num">4</span><strong>Checkout móvil:</strong> mismo flujo que web, reutilizando schemas zod compartidos.</li>
+                <li><span class="step-num">5</span><strong>Seguimiento en vivo:</strong> pantalla <code>order/[id]</code> con timeline y WebSocket.</li>
+                <li><span class="step-num">6</span><strong>Push notifications:</strong> permiso, registro de token, recepción, deep link al pedido al tocarla.</li>
+                <li><span class="step-num">7</span><strong>Pantalla staff (P2 opcional):</strong> cola de pedidos con actualización en vivo para rol STAFF.</li>
+                <li><span class="step-num">8</span><strong>Build de desarrollo:</strong> <code>eas build --profile development</code> y prueba en dispositivo físico.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>React Native no es "React en el teléfono": aprenderás sus primitivas (<code>View</code>, <code>Text</code>, <code>FlatList</code>, <code>Pressable</code>), cómo funciona la navegación nativa, el ciclo de permisos (notificaciones), y la diferencia entre desarrollo con Expo Go y builds compiladas con EAS. Tu conocimiento de React se transfiere casi completo.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> app instalada en tu teléfono: pedir desde la app, recibir push cuando el negocio actualiza el estado, seguimiento en vivo. <strong>Proyecto completo end-to-end.</strong></p>
+            </div>
+        </div>
+
+        <!-- FASE 8 -->
+        <div class="phase-box">
+            <div class="phase-header">
+                <span class="phase-badge">FASE 8</span>
+                <h4 class="phase-title">Deploy, CI/CD y Portfolio</h4>
+                <span class="phase-weeks">Semanas 13-14</span>
+            </div>
+            <p>Llevar todo a producción real y convertirlo en una pieza de portfolio que consiga entrevistas.</p>
+            <ol class="step-list">
+                <li><span class="step-num">1</span><strong>Deploy API + BD:</strong> Railway (o Render): servicio NestJS + PostgreSQL gestionado, variables de entorno, migraciones automáticas en el deploy.</li>
+                <li><span class="step-num">2</span><strong>Deploy web:</strong> Vercel conectado al repo (deploy automático por push a <code>main</code>), variables de entorno apuntando a la API.</li>
+                <li><span class="step-num">3</span><strong>Build móvil:</strong> <code>eas build</code> para Android APK instalable (y perfil de producción).</li>
+                <li><span class="step-num">4</span><strong>CI con GitHub Actions:</strong> workflow que corre lint + typecheck + tests en cada PR (ver sección CI/CD).</li>
+                <li><span class="step-num">5</span><strong>README profesional (en inglés):</strong> qué es, screenshots, diagrama de arquitectura, stack, cómo correrlo, decisiones técnicas.</li>
+                <li><span class="step-num">6</span><strong>Video demo (2-3 min, inglés):</strong> graba el flujo completo: cliente pide desde el móvil → suena en el dashboard → estados avanzan en vivo en ambos.</li>
+                <li><span class="step-num">7</span><strong>LinkedIn + CV:</strong> publica el proyecto con el video; añade las tecnologías al perfil.</li>
+            </ol>
+            <div class="learn-box">
+                <div class="learn-title">&#127891; Aprenderás aquí</div>
+                <p>Qué significa "producción" de verdad: variables de entorno por ambiente, migraciones en deploy, CORS entre dominios reales, y por qué los pipelines de CI existen (atrapar errores antes de mergear). Además: <strong>cómo presentar un proyecto</strong> — el demo en video vale más que 200 líneas de descripción.</p>
+            </div>
+            <div class="callout callout-success">
+                <span class="callout-icon">&#9989;</span>
+                <p><strong>Entregable:</strong> URLs públicas funcionando, CI verde, README en inglés, video demo. Proyecto listo para mostrar en entrevistas.</p>
+            </div>
+        </div>
+
+        <h3>Resumen visual</h3>
+        <div class="ascii-diagram">
+  Sem  1  2  3  4  5  6  7  8  9 10 11 12 13 14
+       [──F1──][F2][──F3──][F4][──F5──][F6][───F7───][──F8──]
+       Setup  Auth  API   WS  Web   Admin Mobile   Deploy
+       mono        núcleo    cliente            push   + CI/CD
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 16. PRACTICAS ==================== -->
+    <section id="practicas">
+        <h2>Mejores Prácticas y Estándares</h2>
+
+        <h3>Código</h3>
+        <ul>
+            <li><strong>TypeScript estricto</strong> en las tres apps (<code>"strict": true</code>). Prohibido <code>any</code> salvo justificación en comentario.</li>
+            <li><strong>Nombres en inglés</strong> en todo el código (variables, funciones, ramas, commits). Comentarios y UI en español.</li>
+            <li><strong>Funciones pequeñas</strong> (&lt; 30 líneas) con un solo propósito. Un service grande se divide por caso de uso.</li>
+            <li><strong>Errores explícitos:</strong> lanzar excepciones tipadas de NestJS (<code>NotFoundException</code>, <code>ForbiddenException</code>...), nunca retornar <code>null</code> silencioso en fallos de negocio.</li>
+            <li><strong>No lógica en controllers:</strong> el controller valida y delega; la lógica vive en services (igual que en tu Clean Architecture).</li>
+        </ul>
+
+        <h3>Git</h3>
+        <ul>
+            <li><strong>Conventional Commits:</strong> <code>feat(orders): add status transition validation</code>, <code>fix(api): correct VES rounding</code>.</li>
+            <li><strong>Ramas por fase/feature:</strong> <code>feat/orders-module</code> → PR → <code>main</code>. Aunque trabajes solo: practica el flujo profesional.</li>
+            <li><strong>PRs pequeños:</strong> un paso del plan = un PR. Revisa tu propio diff antes de mergear (encontrarás errores).</li>
+        </ul>
+
+        <h3>Variables de entorno requeridas</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>App</th><th>Descripción</th></tr></thead>
+            <tbody>
+                <tr><td><code>DATABASE_URL</code></td><td>api</td><td>Conexión PostgreSQL</td></tr>
+                <tr><td><code>JWT_SECRET</code> / <code>JWT_REFRESH_SECRET</code></td><td>api</td><td>Firma de tokens (32+ chars aleatorios)</td></tr>
+                <tr><td><code>CLOUDINARY_*</code></td><td>api</td><td>Cloud name, API key, secret</td></tr>
+                <tr><td><code>BCV_API_URL</code></td><td>api</td><td>Fuente de la tasa de cambio</td></tr>
+                <tr><td><code>NEXT_PUBLIC_API_URL</code></td><td>web</td><td>URL base de la API</td></tr>
+                <tr><td><code>EXPO_PUBLIC_API_URL</code></td><td>mobile</td><td>URL base de la API</td></tr>
+            </tbody>
+        </table>
+
+        <div class="callout callout-danger">
+            <span class="callout-icon">&#128680;</span>
+            <p><strong>Jamás</strong> commitees un <code>.env</code> real. Solo <code>.env.example</code> con valores de muestra. Verifica que <code>.gitignore</code> lo incluya desde el primer commit.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 17. TESTING ==================== -->
+    <section id="testing">
+        <h2>Testing</h2>
+        <p>Estrategia pragmática para un proyecto portfolio: cubrir lo que cuesta dinero o rompe el negocio.</p>
+
+        <table>
+            <thead><tr><th>Tipo</th><th>Qué cubre</th><th>Herramienta</th><th>Meta</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Unitarios</strong></td><td>Máquina de estados, cálculo de totales, conversión de moneda, auth service</td><td>Vitest</td><td>100% en lógica de dinero y estados</td></tr>
+                <tr><td><strong>Integración</strong></td><td>Endpoints críticos: crear pedido, cambiar estado, auth</td><td>Vitest + supertest (con BD de test en Docker)</td><td>Flujo de pedido completo</td></tr>
+                <tr><td><strong>E2E (opcional)</strong></td><td>Login → pedir → seguir pedido en web</td><td>Playwright</td><td>1 flujo feliz</td></tr>
+            </tbody>
+        </table>
+
+        <div class="code-header"><span>Ejemplo: test de la máquina de estados</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="func">describe</span>(<span class="str">'ORDER_TRANSITIONS'</span>, () => {
+  <span class="func">it</span>(<span class="str">'permite el flujo feliz completo'</span>, () => {
+    <span class="func">expect</span>(<span class="func">canTransition</span>(<span class="str">'PENDING'</span>, <span class="str">'CONFIRMED'</span>)).<span class="func">toBe</span>(<span class="kw">true</span>);
+    <span class="func">expect</span>(<span class="func">canTransition</span>(<span class="str">'CONFIRMED'</span>, <span class="str">'PREPARING'</span>)).<span class="func">toBe</span>(<span class="kw">true</span>);
+    <span class="func">expect</span>(<span class="func">canTransition</span>(<span class="str">'READY'</span>, <span class="str">'DELIVERED'</span>)).<span class="func">toBe</span>(<span class="kw">true</span>);
+  });
+
+  <span class="func">it</span>(<span class="str">'rechaza transiciones imposibles'</span>, () => {
+    <span class="func">expect</span>(<span class="func">canTransition</span>(<span class="str">'PENDING'</span>, <span class="str">'DELIVERED'</span>)).<span class="func">toBe</span>(<span class="kw">false</span>);
+    <span class="func">expect</span>(<span class="func">canTransition</span>(<span class="str">'CANCELLED'</span>, <span class="str">'CONFIRMED'</span>)).<span class="func">toBe</span>(<span class="kw">false</span>);
+  });
+});</code></pre>
+
+        <div class="learn-box">
+            <div class="learn-title">&#127891; Aprende: ¿qué testear cuando el tiempo es limitado?</div>
+            <p>La pregunta correcta no es "¿cuánto coverage?" sino "<strong>¿qué bug me costaría más caro?</strong>". En DeliLocal: totales mal calculados y estados inválidos. Por eso esos tienen 100% de cobertura, mientras que un componente de UI secundario puede quedar sin test. Este criterio (risk-based testing) es lo que diferencia a un ingeniero senior de uno que persigue porcentajes.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 18. CI/CD ==================== -->
+    <section id="cicd">
+        <h2>CI/CD y Deploy</h2>
+
+        <h3>Pipeline de CI (GitHub Actions)</h3>
+        <div class="code-header"><span>.github/workflows/ci.yml</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="kw">name</span>: CI
+<span class="kw">on</span>: [pull_request]
+<span class="kw">jobs</span>:
+  <span class="kw">quality</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+      - <span class="kw">uses</span>: actions/setup-node@v4
+        <span class="kw">with</span>: { node-version: 20, cache: npm }
+      - <span class="kw">run</span>: npm ci
+      - <span class="kw">run</span>: npx turbo run lint typecheck test</code></pre>
+
+        <h3>Topología de producción</h3>
+        <table>
+            <thead><tr><th>Pieza</th><th>Servicio</th><th>Notas</th></tr></thead>
+            <tbody>
+                <tr><td>Web (Next.js)</td><td><strong>Vercel</strong></td><td>Deploy automático desde <code>main</code>, gratis</td></tr>
+                <tr><td>API (NestJS)</td><td><strong>Railway</strong> o Render</td><td>WebSockets soportados; corre migraciones en release</td></tr>
+                <tr><td>PostgreSQL</td><td><strong>Railway</strong> / Neon / Supabase</td><td>Plan gratuito suficiente para el MVP</td></tr>
+                <tr><td>Móvil</td><td><strong>EAS Build</strong></td><td>APK Android gratis; iOS requiere cuenta Apple ($99/año)</td></tr>
+                <tr><td>Imágenes</td><td><strong>Cloudinary</strong></td><td>25 GB gratis</td></tr>
+            </tbody>
+        </table>
+
+        <div class="callout callout-warning">
+            <span class="callout-icon">&#9888;</span>
+            <p><strong>Atención con Vercel:</strong> sus funciones serverless <em>no</em> soportan WebSockets persistentes. Por eso la API (con Socket.IO) vive en Railway/Render, no en Vercel. Esta separación es una decisión de arquitectura deliberada y un excelente tema de conversación en entrevistas.</p>
+        </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 19. COMANDOS ==================== -->
+    <section id="comandos">
+        <h2>Comandos de Referencia Rápida</h2>
+
+        <h3>Setup inicial</h3>
+        <div class="code-header"><span>terminal</span><button class="copy-btn">Copiar</button></div>
+<pre><code><span class="comment"># Crear monorepo</span>
+npm create turbo@latest delilocal
+
+<span class="comment"># API NestJS</span>
+cd apps &amp;&amp; nest new api --package-manager npm
+
+<span class="comment"># Web Next.js</span>
+npx create-next-app@latest web --typescript --tailwind --app
+cd web &amp;&amp; npx shadcn@latest init
+
+<span class="comment"># Móvil Expo</span>
+npx create-expo-app@latest mobile --template tabs
+
+<span class="comment"># PostgreSQL local con Docker</span>
+docker run --name delilocal-db -e POSTGRES_PASSWORD=dev \
+  -e POSTGRES_DB=delilocal -p 5432:5432 -d postgres:16</code></pre>
+
+        <h3>Día a día</h3>
+        <table>
+            <thead><tr><th>Comando</th><th>Qué hace</th></tr></thead>
+            <tbody>
+                <tr><td><code>npm run dev</code></td><td>Levanta las tres apps en paralelo (Turborepo)</td></tr>
+                <tr><td><code>npx prisma migrate dev --name init</code></td><td>Crea y aplica una migración</td></tr>
+                <tr><td><code>npx prisma studio</code></td><td>Explorador visual de la BD</td></tr>
+                <tr><td><code>npx prisma db seed</code></td><td>Carga datos de prueba</td></tr>
+                <tr><td><code>nest g resource orders</code></td><td>Genera módulo + controller + service</td></tr>
+                <tr><td><code>npx turbo run lint typecheck test</code></td><td>Verificación completa (lo mismo que CI)</td></tr>
+                <tr><td><code>npx expo start</code></td><td>Servidor de desarrollo móvil (QR para Expo Go)</td></tr>
+                <tr><td><code>eas build --platform android --profile preview</code></td><td>APK instalable</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 20. GLOSARIO ==================== -->
+    <section id="glosario">
+        <h2>Glosario</h2>
+        <table>
+            <thead><tr><th>Término</th><th>Definición</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Monorepo</strong></td><td>Un solo repositorio Git con varios proyectos y paquetes compartidos.</td></tr>
+                <tr><td><strong>DTO (Data Transfer Object)</strong></td><td>Clase que define la forma exacta de los datos que entran/salen de la API, con validaciones.</td></tr>
+                <tr><td><strong>Guard</strong></td><td>Componente de NestJS que decide si un request puede continuar (autenticación, roles).</td></tr>
+                <tr><td><strong>Gateway</strong></td><td>Componente de NestJS que maneja conexiones WebSocket.</td></tr>
+                <tr><td><strong>Room</strong></td><td>Canal con nombre dentro de Socket.IO para enviar eventos a grupos específicos.</td></tr>
+                <tr><td><strong>JWT (JSON Web Token)</strong></td><td>Token firmado que contiene la identidad del usuario; el servidor lo verifica sin consultar la BD.</td></tr>
+                <tr><td><strong>Refresh token</strong></td><td>Token de larga duración usado solo para obtener access tokens nuevos.</td></tr>
+                <tr><td><strong>Snapshot</strong></td><td>Copia de un dato (precio, tasa, nombre) en el momento de una operación, para preservar el historial.</td></tr>
+                <tr><td><strong>Máquina de estados</strong></td><td>Modelo que define los estados posibles de una entidad y las transiciones legales entre ellos.</td></tr>
+                <tr><td><strong>Hidratación</strong></td><td>Proceso por el que React "activa" en el navegador el HTML generado en el servidor.</td></tr>
+                <tr><td><strong>ORM</strong></td><td>Object-Relational Mapper: traduce entre objetos de código y tablas SQL (Prisma ≈ Entity Framework).</td></tr>
+                <tr><td><strong>Seed</strong></td><td>Script que carga datos iniciales/de prueba en la base de datos.</td></tr>
+                <tr><td><strong>Rate limiting</strong></td><td>Límite de peticiones por tiempo para frenar abuso y fuerza bruta.</td></tr>
+                <tr><td><strong>CI/CD</strong></td><td>Integración Continua (tests automáticos en cada cambio) / Despliegue Continuo (deploy automático).</td></tr>
+                <tr><td><strong>Push token</strong></td><td>Identificador único del dispositivo que permite enviarle notificaciones push.</td></tr>
+                <tr><td><strong>Deep link</strong></td><td>Enlace que abre una pantalla específica dentro de la app móvil.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ==================== 21. RECURSOS ==================== -->
+    <section id="recursos">
+        <h2>Recursos y Referencias</h2>
+
+        <h3>Documentación oficial (tu primera fuente, siempre)</h3>
+        <ul>
+            <li><a href="https://docs.nestjs.com" target="_blank">NestJS Docs</a> — excelente, léela por módulos conforme avanzan las fases.</li>
+            <li><a href="https://www.prisma.io/docs" target="_blank">Prisma Docs</a> — especialmente "Relations" y "Transactions".</li>
+            <li><a href="https://nextjs.org/learn" target="_blank">Next.js Learn</a> — curso oficial interactivo gratuito, hazlo en la Fase 5.</li>
+            <li><a href="https://docs.expo.dev" target="_blank">Expo Docs</a> — las guías de Router y Notifications.</li>
+            <li><a href="https://socket.io/docs/v4" target="_blank">Socket.IO Docs</a> — secciones "Rooms" y "Namespaces".</li>
+            <li><a href="https://ui.shadcn.com" target="_blank">shadcn/ui</a> — catálogo de componentes para copiar.</li>
+            <li><a href="https://www.typescriptlang.org/docs/handbook" target="_blank">TypeScript Handbook</a> — para las semanas 1-2.</li>
+        </ul>
+
+        <h3>Cuándo consultar qué</h3>
+        <table>
+            <thead><tr><th>Fase</th><th>Recurso principal a estudiar en paralelo</th></tr></thead>
+            <tbody>
+                <tr><td>F1</td><td>TypeScript Handbook (bases) + docs de Turborepo</td></tr>
+                <tr><td>F2</td><td>NestJS: sección "Authentication" + conceptos JWT</td></tr>
+                <tr><td>F3</td><td>Prisma: relations, transactions + diseño de máquinas de estados</td></tr>
+                <tr><td>F4</td><td>Socket.IO: rooms, namespaces, auth en handshake</td></tr>
+                <tr><td>F5</td><td>Next.js Learn completo + TanStack Query docs</td></tr>
+                <tr><td>F6</td><td>Patrones de dashboards: TanStack Query invalidation</td></tr>
+                <tr><td>F7</td><td>Expo Router + Expo Notifications guides</td></tr>
+                <tr><td>F8</td><td>Docs de Railway, Vercel y EAS Build</td></tr>
+            </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+            <span class="callout-icon">&#128161;</span>
+            <p><strong>Regla anti-tutorial-hell:</strong> no veas cursos completos "por si acaso". Estudia la documentación <em>de la fase en la que estás</em>, construye, y solo busca más cuando te trabes. El proyecto es el curso.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p><strong>DeliLocal</strong> — Guía de Desarrollo v1.0 · Generada como continuación del aprendizaje iniciado con FinTrack</p>
+        <p>Stack: TypeScript · NestJS · Next.js · Expo · PostgreSQL · Prisma · Socket.IO · Turborepo</p>
+        <p>Última actualización: octubre 2026</p>
+    </footer>
+
+    </div><!-- /content-wrapper -->
+</main>
+
+<script>
+    // ===== Copy buttons =====
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pre = btn.closest('.code-header')?.nextElementSibling;
+            if (pre && pre.tagName === 'PRE') {
+                navigator.clipboard.writeText(pre.innerText).then(() => {
+                    btn.textContent = '¡Copiado!';
+                    setTimeout(() => btn.textContent = 'Copiar', 1500);
+                });
+            }
+        });
+    });
+
+    // ===== Active nav on scroll =====
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-list a');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(l => l.classList.remove('active'));
+                const link = document.querySelector(`.nav-list a[href="#${entry.target.id}"]`);
+                if (link) link.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+
+    // ===== Close sidebar on mobile after click =====
+    navLinks.forEach(l => l.addEventListener('click', () => {
+        if (window.innerWidth <= 900) document.querySelector('.sidebar').classList.remove('open');
+    }));
+</script>
+
+</body>
+</html>
